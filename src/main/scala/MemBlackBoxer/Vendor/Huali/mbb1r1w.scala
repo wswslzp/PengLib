@@ -1,9 +1,10 @@
-package Vendor.Huali
+package MemBlackBoxer.Vendor.Huali
 
 import spinal.core._
 import spinal.lib._
+import MemBlackBoxer._
 import Vendor._
-import MemManager._
+import MemBlackBoxer.MemManager._
 
 class mbb1r1w(wrap: Ram1r1w) extends Vendor.MemBlackBox(wrap.mc) {
   //  this.setDefinitionName()

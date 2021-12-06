@@ -1,4 +1,4 @@
-package MemManager
+package MemBlackBoxer.MemManager
 
 import spinal.core._
 import spinal.lib._

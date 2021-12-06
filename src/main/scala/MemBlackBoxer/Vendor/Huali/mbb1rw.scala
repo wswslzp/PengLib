@@ -1,8 +1,9 @@
-package Vendor.Huali
+package MemBlackBoxer.Vendor.Huali
 
 import spinal.core._
 import spinal.lib._
-import MemManager._
+import MemBlackBoxer.MemManager._
+import MemBlackBoxer._
 import Vendor._
 
 class mbb1rw(wrap: Ram1rw) extends Vendor.MemBlackBox(wrap.mc) {

@@ -1,4 +1,4 @@
-package MemManager
+package MemBlackBoxer.MemManager
 
 import scala.collection.mutable
 

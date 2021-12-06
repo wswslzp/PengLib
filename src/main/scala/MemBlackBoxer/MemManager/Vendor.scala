@@ -1,8 +1,8 @@
-package MemManager
+package MemBlackBoxer.MemManager
 
 import spinal.core._
 import spinal.lib._
-import Vendor._
+import MemBlackBoxer.Vendor._
 
 trait Vendor {
   def build(mw: Ram1rw): MemBlackBox
@@ -12,6 +12,7 @@ trait Vendor {
 }
 
 case object Huali extends Vendor {
+  import MemBlackBoxer._
   override def build(mw: Ram1rw): MemBlackBox = new Vendor.Huali.mbb1rw(mw).Build()
   override def build(mw: Ram1r1w): MemBlackBox = new Vendor.Huali.mbb1r1w(mw).Build()
   override def build(mw: Ram2rw): MemBlackBox = new Vendor.Huali.mbb2rw(mw).Build()
