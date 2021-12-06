@@ -2,7 +2,6 @@ package MemManager
 
 import spinal.core._
 import spinal.lib._
-import Util._
 
 trait MemWrap {
   def addSimulationModel(fileName: String)
