@@ -22,7 +22,7 @@ object MemTest {
     val vendor =MemBlackBoxer.MemManager.Huali
     SpinalConfig(
       targetDirectory = "rtl",
-      memBlackBoxers = mutable.ArrayBuffer(new PhaseHualiSram(blackboxAll, vendor))
+      memBlackBoxers = mutable.ArrayBuffer(new PhaseSramConverter(vendor))
     ).generateVerilog(MemToy())
   }
 

@@ -2,16 +2,14 @@ package MemBlackBoxer.MemManager
 
 import spinal.core._
 import spinal.lib._
-
 import MemBlackBoxer._
-import Vendor.MemBlackBox
 
-trait MemWrap {
+trait MemWrapper {
   val ram: MemBlackBox
   def addSimulationModel(fileName: String): Unit = ram.addRTLPath(fileName)
 }
 
-case class Ram1rw(mc: MemConfig) extends Component with MemWrap {
+case class Ram1rw(mc: MemConfig) extends Component with MemWrapper {
   val io = new Bundle {
     val ap = in(AddrCtrlPorts(mc))
     val dp = master(DataPorts(mc))
@@ -22,7 +20,7 @@ case class Ram1rw(mc: MemConfig) extends Component with MemWrap {
   val ram = mc.vendor.build(this)
 }
 
-case class Ram1r1w(mc: MemConfig) extends Component with MemWrap{
+case class Ram1r1w(mc: MemConfig) extends Component with MemWrapper{
   val io = new Bundle {
     val clka, clkb = in Bool()
     val apa = in(AddrCtrlPorts(mc))
@@ -39,7 +37,7 @@ case class Ram1r1w(mc: MemConfig) extends Component with MemWrap{
   val ram = mc.vendor.build(this)
 }
 
-case class Ram2rw(mc: MemConfig) extends Component with MemWrap {
+case class Ram2rw(mc: MemConfig) extends Component with MemWrapper {
   val io = new Bundle {
     val clka, clkb = in Bool()
     val apa = in(AddrCtrlPorts(mc))
@@ -57,7 +55,7 @@ case class Ram2rw(mc: MemConfig) extends Component with MemWrap {
   val ram = mc.vendor.build(this)
 }
 
-case class Rom(mc: MemConfig) extends Component with MemWrap {
+case class Rom(mc: MemConfig) extends Component with MemWrapper {
   val io = new Bundle {
     val cs, wr = in Bool()
     val bwe = mc.genBwe

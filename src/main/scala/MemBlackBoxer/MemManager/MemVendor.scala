@@ -1,10 +1,11 @@
 package MemBlackBoxer.MemManager
 
-import spinal.core._
-import spinal.lib._
 import MemBlackBoxer.Vendor._
+import spinal.core._
 
 trait MemVendor {
+  val policy: MemBlackboxingPolicy = blackboxAll
+
   def prefixName: String
   def build(mw: Ram1rw): MemBlackBox
   def build(mw: Ram1r1w): MemBlackBox

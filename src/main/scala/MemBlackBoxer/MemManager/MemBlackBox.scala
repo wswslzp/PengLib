@@ -1,8 +1,6 @@
-package MemBlackBoxer.Vendor
+package MemBlackBoxer.MemManager
 
 import spinal.core._
-import spinal.lib._
-import MemBlackBoxer.MemManager._
 
 trait MemBlackBox extends BlackBox {
 //  setBlackBoxName(mem_cfg.name)

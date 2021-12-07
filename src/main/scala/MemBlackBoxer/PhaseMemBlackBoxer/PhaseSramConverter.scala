@@ -9,7 +9,7 @@ import MemManager._
 
 //todo add support for multiple vendor support
 //  consider using SpinalTag to annotate the memory.
-class PhaseHualiSram(policy: MemBlackboxingPolicy, vendor: MemVendor = Huali) extends PhaseMemBlackBoxingWithPolicy(policy) {
+class PhaseSramConverter(vendor: MemVendor = Huali) extends PhaseMemBlackBoxingWithPolicy(vendor.policy) {
   override def doBlackboxing(memTopology: MemTopology): String = {
     val mem = memTopology.mem
     def wrapBool(that: Expression): Bool = that match {

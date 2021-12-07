@@ -6,7 +6,6 @@ import MemBlackBoxer._
 import Vendor._
 import MemBlackBoxer.MemManager._
 
-// todo: For one read port and one write port. is that dual clock ?
 class mbb1r1w(wrap: Ram1r1w) extends TwoPortBB(wrap.mc) {
   //  this.setDefinitionName()
   val io = new Bundle {
