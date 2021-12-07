@@ -81,21 +81,25 @@ class PhaseSramConverter(vendor: MemVendor = Huali) extends PhaseMemBlackBoxingW
         }
         null
       case TwoPort =>
-        val rd = memTopology.readsSync.head
-        val wr = memTopology.writes.head
-        val ram = Ram1r1w(memConfig)
+        mem.component.rework {
+          val rd = memTopology.readsSync.head
+          val wr = memTopology.writes.head
+          //        val tmpCfg = MemConfig(32, 32, Huali)
+          val ram = Ram1r1w(memConfig)
 
-        ram.io.clka := rd.clockDomain.readClockWire
-        ram.io.apa.addr.assignFrom(rd.address)
-        ram.io.apa.cs.assignFrom(rd.clockDomain.isClockEnableActive)
-        wrapConsumers(rd, ram.io.dp.dout)
+          ram.io.clka := rd.clockDomain.readClockWire
+          ram.io.apa.addr.assignFrom(rd.address)
+          ram.io.apa.cs.assignFrom(rd.clockDomain.isClockEnableActive)
+          wrapConsumers(rd, ram.io.dp.dout)
 
-        ram.io.clkb := wr.clockDomain.readClockWire
-        ram.io.apb.addr.assignFrom(wr.address)
-        ram.io.apb.cs.assignFrom(wr.clockDomain.isClockEnableActive)
-        ram.io.dp.we.assignFrom(wrapBool(wr.writeEnable))
-        ram.io.dp.din.assignFrom(wr.data)
+          ram.io.clkb := wr.clockDomain.readClockWire
+          ram.io.apb.addr.assignFrom(wr.address)
+          ram.io.apb.cs.assignFrom(wr.clockDomain.isClockEnableActive)
+          ram.io.dp.we.assignFrom(wrapBool(wr.writeEnable))
+          ram.io.dp.din.assignFrom(wr.data)
 
+          removeMem()
+        }
         null
       case ErrorType => "Invalid memory type detected!"
     }
