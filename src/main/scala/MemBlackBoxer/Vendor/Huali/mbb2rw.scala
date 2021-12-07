@@ -6,7 +6,7 @@ import MemBlackBoxer._
 import MemBlackBoxer.MemManager._
 import Vendor._
 
-class mbb2rw(wrap: Ram2rw) extends MemBlackBox(wrap.mc) {
+class mbb2rw(wrap: Ram2rw) extends DualPortBB(wrap.mc) {
   //  this.setDefinitionName()
   val io = new Bundle {
     val CLKA, CLKB = in Bool()
@@ -21,7 +21,7 @@ class mbb2rw(wrap: Ram2rw) extends MemBlackBox(wrap.mc) {
   val cda = ClockDomain(io.CLKA)
   val cdb = ClockDomain(io.CLKB)
 
-  def Build(): MemBlackBox = {
+  def build(): MemBlackBox = {
     wrap.cda.setSynchronousWith(cda)
     wrap.cdb.setSynchronousWith(cdb)
     this.io.CLKA   <> wrap.cda.readClockWire

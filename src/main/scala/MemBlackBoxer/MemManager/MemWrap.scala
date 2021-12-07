@@ -3,8 +3,12 @@ package MemBlackBoxer.MemManager
 import spinal.core._
 import spinal.lib._
 
+import MemBlackBoxer._
+import Vendor.MemBlackBox
+
 trait MemWrap {
-  def addSimulationModel(fileName: String)
+  val ram: MemBlackBox
+  def addSimulationModel(fileName: String): Unit = ram.addRTLPath(fileName)
 }
 
 case class Ram1rw(mc: MemConfig) extends Component with MemWrap {
@@ -16,8 +20,6 @@ case class Ram1rw(mc: MemConfig) extends Component with MemWrap {
   }
   noIoPrefix()
   val ram = mc.vendor.build(this)
-
-  override def addSimulationModel(modelFileName: String): Unit = ram.addRTLPath(modelFileName)
 }
 
 case class Ram1r1w(mc: MemConfig) extends Component with MemWrap{
@@ -35,8 +37,6 @@ case class Ram1r1w(mc: MemConfig) extends Component with MemWrap{
   cdb.clock := io.clkb
   noIoPrefix()
   val ram = mc.vendor.build(this)
-
-  override def addSimulationModel(modelFileName: String): Unit = ram.addRTLPath(modelFileName)
 }
 
 case class Ram2rw(mc: MemConfig) extends Component with MemWrap {
@@ -55,8 +55,6 @@ case class Ram2rw(mc: MemConfig) extends Component with MemWrap {
   cdb.clock := io.clkb
   noIoPrefix()
   val ram = mc.vendor.build(this)
-
-  override def addSimulationModel(modelFileName: String): Unit = ram.addRTLPath(modelFileName)
 }
 
 case class Rom(mc: MemConfig) extends Component with MemWrap {
@@ -68,6 +66,4 @@ case class Rom(mc: MemConfig) extends Component with MemWrap {
   }
   noIoPrefix()
   val ram = mc.vendor.build(this)
-
-  override def addSimulationModel(modelFileName: String): Unit = ram.addRTLPath(modelFileName)
 }

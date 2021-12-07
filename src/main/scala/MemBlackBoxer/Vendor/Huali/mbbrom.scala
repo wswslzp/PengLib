@@ -6,7 +6,7 @@ import MemBlackBoxer.MemManager._
 import MemBlackBoxer._
 import Vendor._
 
-class mbbrom(wrap: Rom) extends MemBlackBox(wrap.mc) {
+class mbbrom(wrap: Rom) extends RomBB(wrap.mc) {
 //  this.setDefinitionName()
   val io = new Bundle {
     val CLK = in Bool()
@@ -19,7 +19,7 @@ class mbbrom(wrap: Rom) extends MemBlackBox(wrap.mc) {
 
   val cd = ClockDomain(io.CLK)
 
-  def Build(): MemBlackBox = {
+  def build(): MemBlackBox = {
     wrap.clockDomain.setSynchronousWith(cd)
     io.CLK <> wrap.clockDomain.readClockWire
     io.ADR <> wrap.io.addr

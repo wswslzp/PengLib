@@ -6,7 +6,8 @@ import MemBlackBoxer._
 import Vendor._
 import MemBlackBoxer.MemManager._
 
-class mbb1r1w(wrap: Ram1r1w) extends Vendor.MemBlackBox(wrap.mc) {
+// todo: For one read port and one write port. is that dual clock ?
+class mbb1r1w(wrap: Ram1r1w) extends TwoPortBB(wrap.mc) {
   //  this.setDefinitionName()
   val io = new Bundle {
     val CLKA, CLKB = in Bool()
@@ -21,7 +22,7 @@ class mbb1r1w(wrap: Ram1r1w) extends Vendor.MemBlackBox(wrap.mc) {
   val cda = ClockDomain(io.CLKA)
   val cdb = ClockDomain(io.CLKB)
 
-  def Build(): MemBlackBox = {
+  def build(): MemBlackBox = {
     wrap.cda.setSynchronousWith(cda)
     wrap.cdb.setSynchronousWith(cdb)
     this.io.CLKA   <> wrap.cda.readClockWire
