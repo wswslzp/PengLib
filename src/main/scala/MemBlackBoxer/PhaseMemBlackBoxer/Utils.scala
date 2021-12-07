@@ -17,25 +17,21 @@ object Utils {
   def getMemType(topology: MemTopology): MemType = {
     val mem = topology.mem
     if(mem.initialContent != null) {
-      SpinalInfo("Got an rom")
       ROM
     } else if( // TWO Port
       topology.writes.size == 1 && topology.readsSync.size == 1 && topology.readWriteSync.isEmpty && topology.writeReadSameAddressSync.isEmpty
     ) {
-      SpinalInfo("Got an two port ram")
       TwoPort
     } else if ( // Single port
       topology.portCount == 1 && topology.readWriteSync.size == 1
     ) {
-      SpinalInfo("Got an single port ram")
       SinglePort
     } else if ( // Dual port
       topology.portCount == 2 && topology.readWriteSync.size == 2
     ) {
-      SpinalInfo("Got an dual port ram")
       DualPort
     } else {
-      SpinalInfo("ERROR ram!")
+      SpinalWarning("ERROR ram!")
       ErrorType
     }
   }
