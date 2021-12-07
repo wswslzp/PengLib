@@ -13,7 +13,7 @@ case class Ram1rw(mc: MemConfig) extends Component with MemWrapper {
   val io = new Bundle {
     val ap = in(AddrCtrlPorts(mc))
     val dp = master(DataPorts(mc))
-    val bist = master(BistPorts(mc))
+//    val bist = master(BistPorts(mc))
 //    val scan = master(ScanPorts(mc))
   }
   noIoPrefix()
@@ -26,8 +26,8 @@ case class Ram1r1w(mc: MemConfig) extends Component with MemWrapper{
     val apa = in(AddrCtrlPorts(mc))
     val apb = in(AddrCtrlPorts(mc))
     val dp = master(DataPorts(mc))
-    val bista = master(BistPorts(mc))
-    val bistb = master(BistPorts(mc))
+//    val bista = master(BistPorts(mc))
+//    val bistb = master(BistPorts(mc))
   }
   val cda = ClockDomain.internal("cda", withReset = false)
   val cdb = ClockDomain.internal("cdb", withReset = false)
@@ -42,10 +42,10 @@ case class Ram2rw(mc: MemConfig) extends Component with MemWrapper {
     val clka, clkb = in Bool()
     val apa = in(AddrCtrlPorts(mc))
     val dpa = master(DataPorts(mc))
-    val bista = master(BistPorts(mc))
+//    val bista = master(BistPorts(mc))
     val apb = in(AddrCtrlPorts(mc))
     val dpb = master(DataPorts(mc))
-    val bistb = master(BistPorts(mc))
+//    val bistb = master(BistPorts(mc))
   }
   val cda = ClockDomain.internal("cda", withReset = false)
   val cdb = ClockDomain.internal("cdb", withReset = false)
