@@ -61,15 +61,15 @@ object MemTest {
       val wdata = in Bits(32 bit)
       val rdata = out Bits(32 bit)
     }
-    val pc = new Bundle {
-      val addr = in UInt(10 bit)
-      val we = in Bool()
-      val wdata = in Bits(32 bit)
-      val rdata = out Bits(32 bit)
-    }
+//    val pc = new Bundle {
+//      val addr = in UInt(10 bit)
+//      val we = in Bool()
+//      val wdata = in Bits(32 bit)
+//      val rdata = out Bits(32 bit)
+//    }
     pa.rdata := mem.readWriteSync(pa.addr, pa.wdata, True, pa.we)
     pb.rdata := mem.readWriteSync(pb.addr, pb.wdata, True, pb.we)
-    pc.rdata := mem.readWriteSync(pc.addr, pc.wdata, True, pc.we)
+//    pc.rdata := mem.readWriteSync(pc.addr, pc.wdata, True, pc.we)
 
   }
 

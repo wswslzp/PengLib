@@ -26,8 +26,8 @@ class mbbrom(wrap: Rom) extends RomBB(wrap.mc) {
     io.Q   <> wrap.io.rdata
     io.ME  <> wrap.io.cs
     io.LS  := False
-    io.TEST1 := True
-    io.RME := True
+    io.TEST1 := False
+    io.RME := False
     io.RM  := B"4'b0010"
     this
   }

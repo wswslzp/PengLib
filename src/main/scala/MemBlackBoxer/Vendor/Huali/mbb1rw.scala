@@ -30,8 +30,8 @@ class mbb1rw(wrap: Ram1rw) extends SinglePortBB(wrap.mc) {
     }
     this.io.WE    <> wrap.io.dp.we
     this.io.ME    <> wrap.io.ap.cs
-    this.io.TEST1 := True
-    this.io.RME   := True
+    this.io.TEST1 := False
+    this.io.RME   := False
     this.io.RM    := B"4'b0010"
     this.io.LS    := False
     this

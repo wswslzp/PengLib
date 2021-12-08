@@ -14,7 +14,7 @@ class mbb2rw(wrap: Ram2rw) extends DualPortBB(wrap.mc) {
     val DA, DB = in Bits(wrap.mc.dw bit)
     val QA, QB = out Bits(wrap.mc.dw bit)
     val WEMA, WEMB = if(wrap.mc.needBwe) in Bits(wrap.mc.dw bit) else null
-    val WEA, WEB, MEA, MEB, TEST1A, TEST1B, RMEA, RMEB, LSA, LSB = in Bool()
+    val WEA, WEB, MEA, MEB, TEST1A, TEST1B, RMEA, RMEB, LS = in Bool()
     val RMA, RMB = in Bits(4 bit)
   }
 
@@ -42,14 +42,13 @@ class mbb2rw(wrap: Ram2rw) extends DualPortBB(wrap.mc) {
     this.io.WEB    <> wrap.io.dpb.we
     this.io.MEA    <> wrap.io.apa.cs
     this.io.MEB    <> wrap.io.apb.cs
-    this.io.TEST1A := True
-    this.io.RMEA   := True
+    this.io.TEST1A := False
+    this.io.RMEA   := False
     this.io.RMA    := B"4'b0010"
-    this.io.TEST1B := True
-    this.io.RMEB   := True
+    this.io.TEST1B := False
+    this.io.RMEB   := False
     this.io.RMB    := B"4'b0010"
-    this.io.LSB    := False
-    this.io.LSA    := False
+    this.io.LS    := False
     this
   }
 
