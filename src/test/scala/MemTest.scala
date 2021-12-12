@@ -47,7 +47,7 @@ object MemTest {
 
   }
 
-  case class MemToy3() extends Component {
+  case class MemToy3() extends Module {
     val mem = Mem(Bits(32 bit), 1024)
     val pa = new Bundle {
       val addr = in UInt(10 bit)

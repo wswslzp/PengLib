@@ -19,22 +19,6 @@ class PhaseSramConverter(vendor: MemVendor = Huali) extends PhaseMemBlackBoxingW
         ret.assignFrom(that)
         ret
     }
-    def wrapConsumers(oldSource: Expression, newSource: Expression): Unit ={
-      memTopology.consumers.get(oldSource) match {
-        case None        =>
-        case Some(array) => array.foreach(ec => {
-          ec.remapExpressions{
-            case e if e == oldSource => newSource
-            case e                   => e
-          }
-        })
-      }
-    }
-
-    def removeMem(): Unit ={
-      mem.removeStatement()
-      mem.foreachStatements(s => s.removeStatement())
-    }
 
     val memConfig = MemConfig(
       dw = mem.width, aw = mem.addressWidth, vendor = vendor
@@ -52,9 +36,9 @@ class PhaseSramConverter(vendor: MemVendor = Huali) extends PhaseMemBlackBoxingW
           ram.io.dp.we.assignFrom(port.writeEnable)
           ram.io.dp.din.assignFrom(port.data)
           // todo mask write
-          wrapConsumers(port, ram.io.dp.dout)
+          wrapConsumers(memTopology, port, ram.io.dp.dout)
 
-          removeMem()
+          removeMem(mem)
         }
         null
       case DualPort =>
@@ -68,16 +52,16 @@ class PhaseSramConverter(vendor: MemVendor = Huali) extends PhaseMemBlackBoxingW
           ram.io.apa.cs.assignFrom(wrapBool(portA.chipSelect) && portA.clockDomain.isClockEnableActive)
           ram.io.dpa.we.assignFrom(portA.writeEnable)
           ram.io.dpa.din.assignFrom(portA.data)
-          wrapConsumers(portA, ram.io.dpa.dout)
+          wrapConsumers(memTopology, portA, ram.io.dpa.dout)
 
           ram.io.clkb := portB.clockDomain.readClockWire
           ram.io.apb.addr.assignFrom(portB.address)
           ram.io.apb.cs.assignFrom(wrapBool(portB.chipSelect) && portB.clockDomain.isClockEnableActive)
           ram.io.dpb.we.assignFrom(portB.writeEnable)
           ram.io.dpb.din.assignFrom(portB.data)
-          wrapConsumers(portB, ram.io.dpb.dout)
+          wrapConsumers(memTopology, portB, ram.io.dpb.dout)
 
-          removeMem()
+          removeMem(mem)
         }
         null
       case TwoPort =>
@@ -90,7 +74,7 @@ class PhaseSramConverter(vendor: MemVendor = Huali) extends PhaseMemBlackBoxingW
           ram.io.clka := rd.clockDomain.readClockWire
           ram.io.apa.addr.assignFrom(rd.address)
           ram.io.apa.cs.assignFrom(rd.clockDomain.isClockEnableActive)
-          wrapConsumers(rd, ram.io.dp.dout)
+          wrapConsumers(memTopology, rd, ram.io.dp.dout)
 
           ram.io.clkb := wr.clockDomain.readClockWire
           ram.io.apb.addr.assignFrom(wr.address)
@@ -98,7 +82,7 @@ class PhaseSramConverter(vendor: MemVendor = Huali) extends PhaseMemBlackBoxingW
           ram.io.dp.we.assignFrom(wrapBool(wr.writeEnable))
           ram.io.dp.din.assignFrom(wr.data)
 
-          removeMem()
+          removeMem(mem)
         }
         null
       case ErrorType => "Invalid memory type detected!"
