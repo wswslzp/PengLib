@@ -1,8 +1,7 @@
-package InterpolatePack
+package MathLib.Interpolate
 
 import Tree._
 import spinal.core._
-import spinal.lib._
 
 
 /**

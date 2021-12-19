@@ -1,7 +1,7 @@
-package InterpolatePack
+package MathLib.Interpolate
 
 import spinal.core._
-import java.io.File
+
 import scala.collection.mutable
 
 trait InterpolatePolicy {
@@ -112,7 +112,6 @@ object Interpolate {
   }
 
   def main(args: Array[String]): Unit = {
-    import spinal.core.sim._
     SpinalConfig(
       targetDirectory = "rtl",
       headerWithDate = true,

@@ -1,8 +1,8 @@
 package Tree
 
+import MathLib.Interpolate.{BasicInterpolateUnit, InterpolateUnit, SingleParamValuePair}
 import spinal.core._
 import spinal.lib._
-import InterpolatePack._
 
 import scala.collection.mutable
 import scala.collection.mutable.ArrayBuffer

@@ -90,3 +90,19 @@ class PhaseSramConverter(vendor: MemVendor = Huali) extends PhaseMemBlackBoxingW
 
   }
 }
+
+class PhaseMemTopoPrinter() extends PhaseMemBlackBoxingWithPolicy(blackboxAll) {
+  override def doBlackboxing(memTopology: MemTopology) = {
+//    SpinalInfo(s"${this.getClass} is not able to blackbox ${topology.mem}\n  write ports : ${topology.writes.size} \n  readAsync ports : ${topology.readsAsync.size} \n  readSync ports : ${topology.readsSync.size} \n  readWrite ports : ${topology.readWriteSync.size}\n  -> $message")
+    SpinalInfo(
+      s"""
+         |=======================================================
+         |The ${memTopology.mem} topology is
+         |write ports         : ${memTopology.writes.size}
+         |readAsync ports     : ${memTopology.readsAsync.size}
+         |readSync ports      : ${memTopology.readsSync.size}
+         |readWriteSync ports : ${memTopology.readWriteSync.size}
+         |=======================================================""".stripMargin)
+    null
+  }
+}

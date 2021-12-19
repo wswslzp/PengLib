@@ -1,7 +1,6 @@
-package InterpolatePack
+package MathLib.Interpolate
 
 import spinal.core._
-import spinal.lib._
 
 case class SingleParamValuePair[T <: Data with Num[T]](dataType: HardType[T]) extends Bundle{
   val param = dataType()

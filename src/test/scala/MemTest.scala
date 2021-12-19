@@ -5,8 +5,8 @@ import bus.amba4.axi._
 
 import java.io.File
 import scala.collection.mutable
-
 import MemBlackBoxer.PhaseMemBlackBoxer._
+import spinal.core.internals.Operator
 
 object MemTest {
 
@@ -73,13 +73,22 @@ object MemTest {
 
   }
 
+  case class MemToy4() extends Module {
+    val mem = Mem(Bits(32 bit), 512)
+//    mem(in UInt(9 bit)) := in Bits(32 bit)
+    mem.write(in UInt(9 bit), in Bits(32 bit))
+//    out(mem(in UInt(9 bit)))
+    out(mem.readSync(in UInt(9 bit)))
+  }
+
   def main(args: Array[String]): Unit = {
     new File("rtl").mkdir()
     val vendor =MemBlackBoxer.MemManager.Huali
     SpinalConfig(
       targetDirectory = "rtl",
-      memBlackBoxers = mutable.ArrayBuffer(new PhaseSramConverter(vendor))
-    ).generateVerilog(MemToy3())
+//      memBlackBoxers = mutable.ArrayBuffer(new PhaseSramConverter(vendor))
+      memBlackBoxers = mutable.ArrayBuffer(new PhaseMemTopoPrinter)
+    ).addStandardMemBlackboxing(blackboxAll).generateVerilog(MemToy4())
   }
 
 }
