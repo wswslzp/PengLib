@@ -1,3 +1,5 @@
+package Util
+
 import spinal.core._
 import spinal.lib._
 
@@ -5,10 +7,11 @@ import spinal.lib._
 // pp_div.io.a := a
 // pp_div.io.b := b
 // io.quo := pp_div.io.quo
-class Pingpong[T<:Component](wrapped: => T, dc: Int) extends Area {
+// todo: WRONGFULNESS
+class PingPong[T<:Component](wrapped: => T, dc: Int) extends Area {
 
   private val pingPongUnit = wrapped
-  val newName = "pingpong_" + pingPongUnit.getClass.toString.replace("class ", "")
+  val newName = "PingPong_" + pingPongUnit.getClass.toString.replace("class ", "")
   pingPongUnit.setDefinitionName(newName)
   pingPongUnit.addPrePopTask(() => {
 
@@ -72,9 +75,9 @@ class Pingpong[T<:Component](wrapped: => T, dc: Int) extends Area {
 
 }
 
-object Pingpong {
-  implicit def toImplicit[T <: Component](pingPongProto: Pingpong[T]): T = pingPongProto.pingPongUnit
-  def apply[T<:Component](dc: Int)(wrapped: => T): Pingpong[T] = new Pingpong[T](wrapped, dc)
+object PingPong {
+  implicit def toImplicit[T <: Component](pingPongProto: PingPong[T]): T = pingPongProto.pingPongUnit
+  def apply[T<:Component](dc: Int)(wrapped: => T): PingPong[T] = new PingPong[T](wrapped, dc)
 
   def main(args: Array[String]): Unit = {
     SpinalConfig()
