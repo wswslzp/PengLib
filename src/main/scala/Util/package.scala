@@ -27,4 +27,38 @@ package object Util {
     def lasting(length: Int) = CountUpInside(signal, length)
   }
 
+  implicit class ModulePimp(module: Module) {
+    def stub(): Unit = module.rework {
+      module.children.clear()
+      module.dslBody.foreachStatements({
+        case d: Data if !d.isDirectionLess =>
+        case s => s.removeStatement()
+      })
+      module.dslBody.foreachStatements({
+        case d: Data if d.isOutputOrInOut =>
+          d := d.getZero
+        case _=>
+      })
+    }
+
+    /**
+     * Carefully use
+     */
+    def cleanUp(): Unit = module.rework {
+      module.children.clear()
+      module.dslBody.foreachStatements({
+        case d: Data if !d.isDirectionLess =>
+        case s => s.removeStatement()
+      })
+    }
+  }
+
+  object PrintRTL {
+    def apply[T <: Component](path: String)(module: =>T): SpinalReport[T] = {
+      val config = SpinalConfig(
+        targetDirectory = path
+      )
+      config.generateVerilog(module)
+    }
+  }
 }

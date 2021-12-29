@@ -10,13 +10,30 @@ import scala.collection.mutable
 object Test1 {
 
   case class MA() extends Module{
-    val a, b = in(Vec.fill(2)(UInt(8 bit)))
-    val prod = (Vec.tabulate(2)(i => a(i) * b(i)))
-    val c = prod.map(p=> out(~p.resize(12)))
+    val a,b = in UInt(8 bit)
+//    val c = out(a * b)
+    val c = out(UInt(16 bit))
+    c := a * b
+
+    def changeToDiv(): this.type = rework {
+      c.removeAssignments()
+      new AreaRoot {
+        val regC = Reg(c)
+        regC := (a / b).resized
+        c := regC
+      }
+      this
+    }
   }
 
   case class PMA() extends Module {
-    val ma = Util.PingPong(2)(MA())
+    val a,b = in UInt(8 bit)
+    val c = out UInt(16 bit)
+//    val ma = Util.PingPongComb(2)(MA())
+    val ma = Util.PingPongComb(MA())
+    ma.a := a
+    ma.b := b
+    c := ma.c
   }
 
   case class MulUnit(width: Int) extends BlackBox {
@@ -32,12 +49,12 @@ object Test1 {
       import pc._
 
       var i = 0
-      walkDrivingExpression({ expr =>
-        println("SHIT GAME!!!" + expr.toStringMultiLine())
-//        expr match {
-//          case inv: Operator.Bool.Not => inv
-//        }
-      })
+//      walkDrivingExpression({ expr =>
+//        println("SHIT GAME!!!" + expr.toStringMultiLine())
+////        expr match {
+////          case inv: Operator.Bool.Not => inv
+////        }
+//      })
 
       walkBaseNodes {
         case node: BaseType =>
@@ -85,8 +102,9 @@ object Test1 {
 
   def main(args: Array[String]): Unit = {
     val config = SpinalConfig(targetDirectory = "rtl")
-    config.addTransformationPhase(new PhaseMulOp)
+//    config.addTransformationPhase(new PhaseMulOp)
     config.generateVerilog(PMA())
+//    config.generateVerilog(MA().changeToDiv())
   }
 
 }
