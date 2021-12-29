@@ -9,5 +9,5 @@ case class InterpolateConfig[T <: Data with Num[T]](
                                                      dim: Int,
                                                    ) {
   @BeanProperty
-  var ports: Int = 2
+  var pointPerDim: Int = 2
 }

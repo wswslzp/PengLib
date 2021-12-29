@@ -11,8 +11,8 @@ import spinal.core._
  */
 case class MultiParamValuePair[T <: Data with Num[T]](cfg: InterpolateConfig[T]) extends Bundle {
   import scala.math.pow
-  val params = Vec.fill(cfg.dim)(Vec.fill(cfg.ports)(cfg.dataType()))
-  val value = Vec.fill(pow(cfg.ports, cfg.dim).toInt)(cfg.dataType())
+  val params = Vec.fill(cfg.dim)(Vec.fill(cfg.pointPerDim)(cfg.dataType()))
+  val value = Vec.fill(pow(cfg.pointPerDim, cfg.dim).toInt)(cfg.dataType())
 }
 
 /**
@@ -27,21 +27,21 @@ sealed abstract class InterpolateUnit[T <: Data with Num[T]](cfg: InterpolateCon
   val y = out(cfg.dataType())
 
   def getIU: BasicInterpolateUnit[T]
-  def getPortsNum: Int = cfg.ports
+  def getPointPerDim: Int = cfg.pointPerDim
   def getDim = cfg.dim
   def getDataType = cfg.dataType
 
   def build(): Unit = {
     // declare ports
-    paramValuePorts = in( MultiParamValuePair(cfg) )
-    paramValuePorts.setWeakName("paramValuePorts")
+    paramValuePorts = in(MultiParamValuePair(cfg))
+    paramValuePorts.setName("paramValuePorts")
     xs = in( Vec.fill(cfg.dim)(cfg.dataType()) )
-    xs.setWeakName("xs")
+    xs.setName("xs")
 
     // create a new BIU tree
     val tree = new IUTree(this)
 
-    val ports = cfg.ports
+    val ports = cfg.pointPerDim
     // connect the io ports to the cfg.data vector
     for(d <- 0 until cfg.dim){
       tree.input_data_vec(d) = xs(d) // connect input

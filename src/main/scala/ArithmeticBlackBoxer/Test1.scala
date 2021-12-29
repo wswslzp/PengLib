@@ -103,8 +103,13 @@ object Test1 {
   def main(args: Array[String]): Unit = {
     val config = SpinalConfig(targetDirectory = "rtl")
 //    config.addTransformationPhase(new PhaseMulOp)
-    config.generateVerilog(PMA())
+//    config.generateVerilog(PMA())
 //    config.generateVerilog(MA().changeToDiv())
+    config.generateVerilog(new Module {
+      val a,b = in Bool()
+      val c = out(a | b)
+      override type RefOwnerType = this.type
+    })
   }
 
 }

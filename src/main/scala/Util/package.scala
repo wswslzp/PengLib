@@ -2,24 +2,21 @@ import spinal.core._
 import spinal.lib._
 
 package object Util {
-  case class CountUpFrom(cond: Bool, length: Int, prefix: String = "") extends Area {
-    val counter = Counter(length).setCompositeName(cond, prefix, weak = true)
+  case class CountUpFrom(cond: Bool, length: Int) extends Composite(cond) {
+    val counter = Counter(length)
     val condPeriodMinusOne = RegInit(False).setWhen(cond).clearWhen(counter.willOverflow)
-    condPeriodMinusOne.setCompositeName(cond, prefix+"_cond_period_minus_1", weak = true)
     val condPeriod = cond | condPeriodMinusOne
-    condPeriod.setCompositeName(cond, prefix+"_cond_period")
     when(condPeriod){
       counter.increment()
     }
   }
 
-  case class CountUpInside(cond: Bool, length: Int, prefix: String = "") extends Area {
-    val counter = Counter(length).setCompositeName(cond, name, weak = true)
+  case class CountUpInside(cond: Bool, length: Int) extends Composite(cond) {
+    val counter = Counter(length)
     when(cond) {
       counter.increment()
     }
     val last = counter.willOverflow
-    last.setCompositeName(cond, name+"_last")
   }
 
   implicit class BoolPimper(signal: Bool) {
@@ -42,7 +39,7 @@ package object Util {
     }
 
     /**
-     * Carefully use
+     * Carefully use, the outputs have no connections.
      */
     def cleanUp(): Unit = module.rework {
       module.children.clear()
@@ -56,7 +53,8 @@ package object Util {
   object PrintRTL {
     def apply[T <: Component](path: String)(module: =>T): SpinalReport[T] = {
       val config = SpinalConfig(
-        targetDirectory = path
+        targetDirectory = path,
+        headerWithDate = true
       )
       config.generateVerilog(module)
     }

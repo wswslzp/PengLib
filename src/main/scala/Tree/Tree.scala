@@ -9,19 +9,22 @@ import scala.collection.mutable.ArrayBuffer
 sealed trait Tree[+A]
 
 class IUTreeNode[T <: Data with Num[T]](iu: InterpolateUnit[T]) extends Tree[InterpolateUnit[T]]{
-  val pv_ports = iu.getPortsNum
+  val pointPerDim = iu.getPointPerDim
   var unit: BasicInterpolateUnit[T] = _
 
   var father: IUTreeNode[T] = _
   var son: List[IUTreeNode[T]] = _
   var level: Int = _
 
-  // software data structure
+  // The basic interpolation units consists of a tree structure
+  // It's depth is equals to the dim-1
+  // and every node of the tree has up to pointPerDim sons/leaves
+  // Each node contain a basic interpolation unit.
   def createSon(lv: Int): Unit = {
     if(lv >= 0){
       level = lv
       unit = iu.getIU
-      son = List.fill(pv_ports)(new IUTreeNode[T](iu))
+      son = List.fill(pointPerDim)(new IUTreeNode[T](iu))
       son.foreach{s=>
         s.father = this
         s.createSon(lv-1)
@@ -48,15 +51,15 @@ class IUTreeNode[T <: Data with Num[T]](iu: InterpolateUnit[T]) extends Tree[Int
 class IUTree[T <: Data with Num[T]](iu: InterpolateUnit[T]) extends Tree[InterpolateUnit[T]]{
   val dim = iu.getDim
   val dataType: HardType[T] = iu.getDataType
-  val ports = iu.getPortsNum
+  val pointPerDim = iu.getPointPerDim
 
   // Need to setup during the IU.build()
   lazy val input_data_vec = ArrayBuffer.fill(dim)(dataType())
   lazy val param_data_vec = List.fill(dim)(
-    ArrayBuffer.fill(ports)(dataType())
+    ArrayBuffer.fill(pointPerDim)(dataType())
   )
-  lazy val value_data_vec = List.fill(scala.math.pow(ports, dim-1).toInt)(
-    ArrayBuffer.fill(ports)(dataType())
+  lazy val value_data_vec = List.fill(scala.math.pow(pointPerDim, dim-1).toInt)(
+    ArrayBuffer.fill(pointPerDim)(dataType())
   )
 
   val root = new IUTreeNode(iu)
@@ -83,7 +86,7 @@ class IUTree[T <: Data with Num[T]](iu: InterpolateUnit[T]) extends Tree[Interpo
     traverseTree{leaf: IUTreeNode[T] =>
       // connect input to the leaves
       leaf.getNodeInput := input_data_vec(leaf.level)
-      for(i <- 0 until ports){
+      for(i <- 0 until pointPerDim){
         val sgpv = SingleParamValuePair(dataType())
         sgpv.param := param_data_vec(leaf.level)(i)
         sgpv.value := value_data_vec(leaf_idx)(i)
@@ -95,7 +98,7 @@ class IUTree[T <: Data with Num[T]](iu: InterpolateUnit[T]) extends Tree[Interpo
       val father = sons.head.father
       father.getNodeInput := input_data_vec(father.level)
       // connect the parameters and values from sons to fathers
-      for(i <- 0 until ports){
+      for(i <- 0 until pointPerDim){
         val sgpv = SingleParamValuePair(dataType())
         sgpv.param := param_data_vec(father.level)(i)
         sgpv.value := sons(i).getNodeOutput

@@ -4,7 +4,7 @@ Collecting some infrastructure library in SpinalHDL. The feature of this library
 
 * Customizable SRAM converter
 * Automatic Ping pong wrapper
-* linear interpolation package
+* Some mathematics libraries
 * and others...
 
 ## SRAM converter
@@ -93,3 +93,20 @@ The `PingPongComb` will check if the module is pure combination.
 Non-blocking data transfer protocol `Flow` and blocking protocol
 `Stream` are not supported. Adding a `valid` signal to the input 
 is not complicated while back-pressured `ready` is.
+
+## Math library
+
+The math lib lies in `src/main/MathLib`. Two basic number types
+are included - Fixed number and Complex number. The Fixed number 
+here is an extension of `spinal` built-in `SFix` and `UFix`. And 
+the Complex number `HComplex` is implemented as a bundle, combining
+real part and imagine part of `SFix`. The basic operations like 
++/-/*/div/conj etc., are implemented as methods. 
+
+Some math functions like `sqrt` are also implemented based on these two number types.
+
+Fast Fourier Transformation (FFT) is also implemented, both for 
+1D and 2D, with fully configurable feature.
+
+Several interpolation methods are also included, such as nearest interpolation,
+linear interpolation, bi-linear interpolation. 
