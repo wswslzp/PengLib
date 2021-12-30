@@ -1,6 +1,6 @@
 package Tree
 
-import MathLib.Interpolate.{BasicInterpolateUnit, InterpolateUnit, SingleParamValuePair}
+import MathLib.Interpolate.{BasicInterpolateUnit, InterpolateUnit, SinglePoint}
 import spinal.core._
 import spinal.lib._
 
@@ -23,8 +23,8 @@ class IUTreeNode[T <: Data with Num[T]](iu: InterpolateUnit[T]) extends Tree[Int
   def createSon(lv: Int): Unit = {
     if(lv >= 0){
       level = lv
-      unit = iu.getIU
-      son = List.fill(pointPerDim)(new IUTreeNode[T](iu))
+      unit = iu.getIU(lv)
+      son = List.fill(pointPerDim(lv))(new IUTreeNode[T](iu))
       son.foreach{s=>
         s.father = this
         s.createSon(lv-1)
@@ -33,6 +33,7 @@ class IUTreeNode[T <: Data with Num[T]](iu: InterpolateUnit[T]) extends Tree[Int
   }
   def isRoot = father == null
   def isLeaf = son.forall(_.unit == null)
+  def index = father.son.indexOf(this)
 
   def deepFirstTraverse[B](f: IUTreeNode[T]=>B)(g: List[B] => B): B = {
     if(isLeaf){ f(this) }
@@ -45,7 +46,7 @@ class IUTreeNode[T <: Data with Num[T]](iu: InterpolateUnit[T]) extends Tree[Int
   // hardware part
   def getNodeOutput: T = unit.io.y
   def getNodeInput: T = unit.io.x
-  def getNodePvPort(idx: Int): SingleParamValuePair[T] = unit.paramValuesIo(idx)
+  def getNodePvPort(idx: Int): SinglePoint[T] = unit.paramValuesIo(idx)
 }
 
 class IUTree[T <: Data with Num[T]](iu: InterpolateUnit[T]) extends Tree[InterpolateUnit[T]]{
@@ -54,13 +55,14 @@ class IUTree[T <: Data with Num[T]](iu: InterpolateUnit[T]) extends Tree[Interpo
   val pointPerDim = iu.getPointPerDim
 
   // Need to setup during the IU.build()
-  lazy val input_data_vec = ArrayBuffer.fill(dim)(dataType())
-  lazy val param_data_vec = List.fill(dim)(
-    ArrayBuffer.fill(pointPerDim)(dataType())
+  lazy val inputVector = ArrayBuffer.fill(dim)(dataType())
+  lazy val paramVector = List.tabulate(dim)(d=>
+    ArrayBuffer.fill(pointPerDim(d))(dataType())
   )
-  lazy val value_data_vec = List.fill(scala.math.pow(pointPerDim, dim-1).toInt)(
-    ArrayBuffer.fill(pointPerDim)(dataType())
-  )
+//  lazy val valueVector = List.fill(scala.math.pow(pointPerDim, dim-1).toInt)(
+//    ArrayBuffer.fill(pointPerDim)(dataType())
+//  )
+  lazy val valueVector = ArrayBuffer.fill(pointPerDim.product)(dataType())
 
   val root = new IUTreeNode(iu)
   root.createSon(dim-1)
@@ -77,6 +79,13 @@ class IUTree[T <: Data with Num[T]](iu: InterpolateUnit[T]) extends Tree[Interpo
     }
     traverseTree(u=> onLeafNode(u))(s=> onBranchNode(s))
   }
+  private def simpleTraverseTree(f: IUTreeNode[T] => Unit): Unit = traverseTree(f)(nodelist=> nodelist.foreach(f(_)))
+  private def giveIuName(): Unit = simpleTraverseTree{leaf=>
+    val name = leaf.unit.getName()
+    val level = leaf.level
+    val index = leaf.index
+    leaf.unit.setName(name + s"_lv$level" + s"_id$index")
+  }
 
   /**
    * Connect the sons' output to the fathers' input.
@@ -85,24 +94,27 @@ class IUTree[T <: Data with Num[T]](iu: InterpolateUnit[T]) extends Tree[Interpo
     var leaf_idx = 0
     traverseTree{leaf: IUTreeNode[T] =>
       // connect input to the leaves
-      leaf.getNodeInput := input_data_vec(leaf.level)
-      for(i <- 0 until pointPerDim){
-        val sgpv = SingleParamValuePair(dataType())
-        sgpv.param := param_data_vec(leaf.level)(i)
-        sgpv.value := value_data_vec(leaf_idx)(i)
-        leaf.getNodePvPort(i) := sgpv
+      val leafDim = leaf.level
+      leaf.getNodeInput := inputVector(leafDim)
+      for(i <- 0 until pointPerDim(leafDim)){
+        val sp = SinglePoint(dataType())
+        sp.param := paramVector(leafDim)(i)
+        sp.value := valueVector(i + leaf_idx * pointPerDim(leafDim))
+//        println(s"connecting leaf pv($leaf_idx)($i) to param($leafDim)($i) and value(${i + leaf_idx * pointPerDim(leafDim)})")
+        leaf.getNodePvPort(i) := sp
       }
       leaf_idx += 1
     }{sons=>
       // connect input to the fathers
       val father = sons.head.father
-      father.getNodeInput := input_data_vec(father.level)
+      val downLevel = father.level
+      father.getNodeInput := inputVector(downLevel)
       // connect the parameters and values from sons to fathers
-      for(i <- 0 until pointPerDim){
-        val sgpv = SingleParamValuePair(dataType())
-        sgpv.param := param_data_vec(father.level)(i)
-        sgpv.value := sons(i).getNodeOutput
-        father.getNodePvPort(i) := sgpv
+      for(i <- 0 until pointPerDim(downLevel)){
+        val sp = SinglePoint(dataType())
+        sp.param := paramVector(downLevel)(i)
+        sp.value := sons(i).getNodeOutput
+        father.getNodePvPort(i) := sp
       }
     }
   }

@@ -30,10 +30,18 @@ class Interpolate[T <: Data with Num[T]](val paramValues: Map[List[T], T]) {
   private val dataType = paramValues.head._2
   private val points = paramValues.toList.length
   private val dim = paramValues.head._1.length
-  private val pointPerDim = (scala.math.log(points)/scala.math.log(dim)).toInt
+//  private val pointPerDim = (scala.math.log(points)/scala.math.log(dim)).toInt
   require(points >= (1 << dim), "Insufficient points.")
   private var policy: InterpolatePolicy = Linear // default policy
   private var xs: List[T] = _
+
+  private def getPointPerDim: List[Int] = {
+    val ret = List.newBuilder[Int]
+    for(d <- 0 until dim) {
+      ret += paramValues.keys.view.map(_(d)).toVector.distinct.length
+    }
+    ret.result()
+  }
 
   def createConfig = InterpolateConfig(dataType, dim)
 
@@ -51,7 +59,8 @@ class Interpolate[T <: Data with Num[T]](val paramValues: Map[List[T], T]) {
    */
   def generate() = new ImplicitArea[T] {
     val cfg = createConfig // set the data type and the dimension.
-    cfg.setPointPerDim(pointPerDim) // set the number of point per dimension.
+    val ppd = getPointPerDim
+    cfg.setPointPerDim(getPointPerDim) // set the number of point per dimension.
     val iu = policy.implement(cfg) // implement a interpolate unit according to policy, which contains multiple basic units.
 
     // connect the io with external data
@@ -68,7 +77,7 @@ class Interpolate[T <: Data with Num[T]](val paramValues: Map[List[T], T]) {
       })
     }
     // connect the input values
-    iu.paramValuePorts.value := Vec(paramValues.values)
+    iu.paramValuePorts.values := Vec(paramValues.values)
 
     override def implicitValue = iu.y
     override type RefOwnerType = this.type

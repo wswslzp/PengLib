@@ -3,16 +3,16 @@ package MathLib.Interpolate
 import Tree._
 import spinal.core._
 
-
 /**
- * Define the multi-dimension interpolation port
- * @param cfg config
- * @tparam T data type
+ * Define the multi-dimension grid parameter points.
+ * @param cfg
+ * @tparam T
  */
-case class MultiParamValuePair[T <: Data with Num[T]](cfg: InterpolateConfig[T]) extends Bundle {
-  import scala.math.pow
-  val params = Vec.fill(cfg.dim)(Vec.fill(cfg.pointPerDim)(cfg.dataType()))
-  val value = Vec.fill(pow(cfg.pointPerDim, cfg.dim).toInt)(cfg.dataType())
+class GridPoint[T<:Data with Num[T]](cfg: InterpolateConfig[T]) extends Bundle {
+  val params = Vec.tabulate(cfg.totalDim){ d=>
+    Vec.fill(cfg.diffPointPerDim(d))(cfg.dataType())
+  }
+  val values = Vec.fill(cfg.diffPointPerDim.product)(cfg.dataType())
 }
 
 /**
@@ -21,38 +21,42 @@ case class MultiParamValuePair[T <: Data with Num[T]](cfg: InterpolateConfig[T])
  * @tparam T data type
  */
 sealed abstract class InterpolateUnit[T <: Data with Num[T]](cfg: InterpolateConfig[T]) extends Component {
-  var paramValuePorts: MultiParamValuePair[T] = _
+//  var paramValuePorts: SquareGridPoint[T] = _
+  var paramValuePorts: GridPoint[T] = _
 
   var xs: Vec[T] = _
   val y = out(cfg.dataType())
 
-  def getIU: BasicInterpolateUnit[T]
-  def getPointPerDim: Int = cfg.pointPerDim
-  def getDim = cfg.dim
+  def getIU(dim: Int): BasicInterpolateUnit[T]
+  def getPointPerDim = cfg.diffPointPerDim
+  def getDim = cfg.totalDim
   def getDataType = cfg.dataType
 
   def build(): Unit = {
     // declare ports
-    paramValuePorts = in(MultiParamValuePair(cfg))
+    paramValuePorts = in(new GridPoint(cfg))
     paramValuePorts.setName("paramValuePorts")
-    xs = in( Vec.fill(cfg.dim)(cfg.dataType()) )
+    xs = in( Vec.fill(cfg.totalDim)(cfg.dataType()) )
     xs.setName("xs")
 
     // create a new BIU tree
     val tree = new IUTree(this)
 
-    val ports = cfg.pointPerDim
+//    val ports = cfg.sqPointPerDim
     // connect the io ports to the cfg.data vector
-    for(d <- 0 until cfg.dim){
-      tree.input_data_vec(d) = xs(d) // connect input
-      for(p <- 0 until ports){
-        tree.param_data_vec(d)(p) = paramValuePorts.params(d)(p)
+    for(d <- 0 until cfg.totalDim){
+      tree.inputVector(d) = xs(d) // connect input
+      for(p <- 0 until cfg.diffPointPerDim(d)){
+        tree.paramVector(d)(p) = paramValuePorts.params(d)(p)
       }
     }
-    for(cluster <- tree.value_data_vec.indices){
-      for(p <- 0 until ports){
-        tree.value_data_vec(cluster)(p) = paramValuePorts.value(cluster * ports + p)
-      }
+//    for(cluster <- tree.valueVector.indices){
+//      for(p <- 0 until ports){
+//        tree.valueVector(cluster)(p) = paramValuePorts.value(cluster * ports + p)
+//      }
+//    }
+    for(valIndex <- tree.valueVector.indices){
+      tree.valueVector(valIndex) = paramValuePorts.values(valIndex)
     }
 
     // connect the tree's units
@@ -65,16 +69,16 @@ sealed abstract class InterpolateUnit[T <: Data with Num[T]](cfg: InterpolateCon
 }
 
 class NearestInterpolateUnit[T <: Data with Num[T]](cfg: InterpolateConfig[T]) extends InterpolateUnit[T](cfg){
-  override def getIU = new NearestBIU[T](cfg).setWeakName("NearestBIU")
+  override def getIU(dim: Int) = new NearestBIU[T](cfg, dim).setWeakName("NearestBIU")
   override type RefOwnerType = this.type
 }
 
 class LinearInterpolateUnit[T <: Data with Num[T]](cfg: InterpolateConfig[T]) extends InterpolateUnit[T](cfg){
-  override def getIU = new LinearBIU[T](cfg).setWeakName("LinearBIU")
+  override def getIU(dim: Int) = new LinearBIU[T](cfg, dim).setWeakName("LinearBIU")
   override type RefOwnerType = this.type
 }
 
 class CubicInterpolateUnit[T <: Data with Num[T]](cfg: InterpolateConfig[T]) extends InterpolateUnit[T](cfg){
-  override def getIU = new CubicBIU[T](cfg).setWeakName("CubicBIU")
+  override def getIU(dim: Int) = new CubicBIU[T](cfg, dim).setWeakName("CubicBIU")
   override type RefOwnerType = this.type
 }

@@ -8,7 +8,7 @@ import spinal.lib._
 import scala.language._
 import Util._
 
-case class NearestTop(num: Int) extends Module {
+case class NearestTop(num: Int = 4) extends Module {
   val params = Vector.fill(num)(in SInt(16 bit))
   val values = Vector.fill(num)(in SInt(16 bit))
   val io = new Bundle {
@@ -24,7 +24,7 @@ case class NearestTop(num: Int) extends Module {
   ).input(io.x).use(Nearest).generate()
 }
 
-case class NearestTop1(num: Int) extends Module {
+case class NearestTop1(num: Int = 8) extends Module {
   val params = Vector.fill(num)(in SInt(16 bit))
   val values = Vector.fill(num)(in SInt(16 bit))
   val io = new Bundle {
@@ -63,9 +63,28 @@ case class NearestTop2(pointPerDim: Int = 3) extends Module {
 
 }
 
+case class NearestTop3(xPoint: Int = 2, yPoint: Int = 4) extends Module {
+  val xParam = Vector.fill(xPoint)(in SInt(16 bit))
+  val yParam = Vector.fill(yPoint)(in SInt(16 bit))
+  val values = Vector.fill(xPoint * yPoint)(in SInt(16 bit))
+  val io = new Bundle {
+    val x, y = in SInt(16 bit)
+    val f = out SInt(16 bit)
+  }
+
+  val pvlist = for{
+      i <- 0 until xPoint
+      j <- 0 until yPoint
+    } yield {
+      List(xParam(i), yParam(j)) -> values(i + j * xPoint)
+    }
+
+  io.f := Interpolate(pvlist).use(Nearest).input(io.x, io.y).generate()
+}
+
 object NearestTest {
 
   def main(args: Array[String]): Unit = {
-    PrintRTL("rtl")(NearestTop2())
+    PrintRTL("rtl")(NearestTop1())
   }
 }

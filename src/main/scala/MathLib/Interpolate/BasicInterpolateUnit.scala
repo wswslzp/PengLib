@@ -3,7 +3,7 @@ package MathLib.Interpolate
 import spinal.core._
 import spinal.lib._
 
-case class SingleParamValuePair[T <: Data with Num[T]](dataType: HardType[T]) extends Bundle{
+case class SinglePoint[T <: Data with Num[T]](dataType: HardType[T]) extends Bundle{
   val param = dataType()
   val value = dataType()
 }
@@ -13,9 +13,9 @@ case class SingleParamValuePair[T <: Data with Num[T]](dataType: HardType[T]) ex
  * @param cfg Configuration of BIU
  * @tparam T Data type that has basic arithmetic operations.
  */
-sealed abstract class BasicInterpolateUnit[T <: Data with Num[T]](cfg: InterpolateConfig[T]) extends Component {
-  require(cfg.pointPerDim >= 2)
-  val paramValuesIo = in( Vec.fill(cfg.pointPerDim)(SingleParamValuePair(cfg.dataType)) )
+sealed abstract class BasicInterpolateUnit[T <: Data with Num[T]](cfg: InterpolateConfig[T], selectedDim: Int) extends Component {
+  require(cfg.diffPointPerDim(selectedDim) >= 2)
+  val paramValuesIo = in( Vec.fill(cfg.diffPointPerDim(selectedDim))(SinglePoint(cfg.dataType)) )
   val io = new Bundle {
     val x  = in(cfg.dataType())
     val y  = out(cfg.dataType())
@@ -23,7 +23,7 @@ sealed abstract class BasicInterpolateUnit[T <: Data with Num[T]](cfg: Interpola
 
   /**
    * Find the interval that x located in.
-   * @return
+   * @return a pair of lower bound and upper bound of found interval
    */
   def findInterval() = new Area {
     setName("compare")
@@ -39,7 +39,7 @@ sealed abstract class BasicInterpolateUnit[T <: Data with Num[T]](cfg: Interpola
    * @param pv0 - lower bound
    * @param pv1 - upper bound
    */
-  def evaluate(pv0: SingleParamValuePair[T], pv1: SingleParamValuePair[T]): Unit
+  def evaluate(pv0: SinglePoint[T], pv1: SinglePoint[T]): Unit
 
   afterElaboration {
     val pvPair = findInterval()
@@ -51,8 +51,8 @@ sealed abstract class BasicInterpolateUnit[T <: Data with Num[T]](cfg: Interpola
  * @param cfg Configuration of BIU
  * @tparam T Data type that has basic arithmetic operations.
  */
-class NearestBIU[T <: Data with Num[T]](cfg: InterpolateConfig[T]) extends BasicInterpolateUnit[T](cfg) {
-  override def evaluate(pv0: SingleParamValuePair[T], pv1: SingleParamValuePair[T]): Unit = new Area {
+class NearestBIU[T <: Data with Num[T]](cfg: InterpolateConfig[T], dim: Int) extends BasicInterpolateUnit[T](cfg, dim) {
+  override def evaluate(pv0: SinglePoint[T], pv1: SinglePoint[T]): Unit = new Area {
     val x_interval = pv1.param - pv0.param
     val x_diff = io.x - pv0.param
     val v_sel = x_diff <= (x_interval >> 1)
@@ -60,8 +60,8 @@ class NearestBIU[T <: Data with Num[T]](cfg: InterpolateConfig[T]) extends Basic
   }.setName("eval")
 }
 
-class LinearBIU[T <: Data with Num[T]](cfg: InterpolateConfig[T]) extends BasicInterpolateUnit[T](cfg) {
-  override def evaluate(pv0: SingleParamValuePair[T], pv1: SingleParamValuePair[T]): Unit = new Area {
+class LinearBIU[T <: Data with Num[T]](cfg: InterpolateConfig[T], dim: Int) extends BasicInterpolateUnit[T](cfg, dim) {
+  override def evaluate(pv0: SinglePoint[T], pv1: SinglePoint[T]): Unit = new Area {
     val x_interval = pv1.param - pv0.param
     val x_diff = io.x - pv0.param
     val f_interval = pv1.value - pv0.value
@@ -75,8 +75,8 @@ class LinearBIU[T <: Data with Num[T]](cfg: InterpolateConfig[T]) extends BasicI
  * @param cfg Configuration of BIU
  * @tparam T Data type that has basic arithmetic operations.
  */
-class CubicBIU[T <: Data with Num[T]](cfg: InterpolateConfig[T]) extends BasicInterpolateUnit[T](cfg) {
-  override def evaluate(pv0: SingleParamValuePair[T], pv1: SingleParamValuePair[T]): Unit = ???
+class CubicBIU[T <: Data with Num[T]](cfg: InterpolateConfig[T], dim: Int) extends BasicInterpolateUnit[T](cfg, dim) {
+  override def evaluate(pv0: SinglePoint[T], pv1: SinglePoint[T]): Unit = ???
 }
 
 //class FractionalBIU[T <: Data with Num[T]](dataType: HardType[T], ports: Int) extends BasicInterpolateUnit[T](dataType, ports){
