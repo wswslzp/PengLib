@@ -83,8 +83,8 @@ case class Rom(mc: MemConfig) extends MemWrapper(mc) {
   val io = new Bundle {
     val cs, wr = in Bool()
     val bwe = mc.genBwe
-    val addr = in UInt(mc.aw bit)
-    val rdata = in Bits(mc.dw bit)
+    val addr = in UInt(mc.addrWidth bit)
+    val rdata = in Bits(mc.dataWidth bit)
   }
   noIoPrefix()
   override val ram = mc.vendor.build(this)

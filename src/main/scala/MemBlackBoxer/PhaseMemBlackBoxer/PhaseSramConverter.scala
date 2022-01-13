@@ -31,8 +31,6 @@ object blackboxAllWithVendorTag extends MemBlackboxingPolicy {
   override def onUnblackboxable(topology: MemTopology, who: Any, message: String): Unit = generateUnblackboxableError(topology, who, message)
 }
 
-//todo add support for multiple vendor support
-//  consider using SpinalTag to annotate the memory.
 class PhaseSramConverter(globalMemVendor: MemVendor = Huali, policy: MemBlackboxingPolicy = blackboxAll) extends PhaseMemBlackBoxingWithPolicy(policy) {
   override def doBlackboxing(memTopology: MemTopology): String = {
     val mem = memTopology.mem
@@ -53,7 +51,7 @@ class PhaseSramConverter(globalMemVendor: MemVendor = Huali, policy: MemBlackbox
     }
 
     val memConfig = MemConfig(
-      dw = mem.width, aw = mem.addressWidth, vendor = getVendor
+      dataWidth = mem.width, addrWidth = mem.addressWidth, vendor = getVendor
     )
 
     getMemType(memTopology) match {
@@ -105,12 +103,12 @@ class PhaseSramConverter(globalMemVendor: MemVendor = Huali, policy: MemBlackbox
 
           ram.io.clka := rd.clockDomain.readClockWire
           ram.io.apa.addr.assignFrom(rd.address)
-          ram.io.apa.cs.assignFrom(rd.clockDomain.isClockEnableActive)
+          ram.io.apa.cs.assignFrom(rd.clockDomain.isClockEnableActive && wrapBool(wr.writeEnable))
           wrapConsumers(memTopology, rd, ram.io.dp.dout)
 
           ram.io.clkb := wr.clockDomain.readClockWire
           ram.io.apb.addr.assignFrom(wr.address)
-          ram.io.apb.cs.assignFrom(wr.clockDomain.isClockEnableActive)
+          ram.io.apb.cs.assignFrom(wr.clockDomain.isClockEnableActive && wrapBool(rd.readEnable))
           ram.io.dp.we.assignFrom(wrapBool(wr.writeEnable))
           ram.io.dp.din.assignFrom(wr.data)
 

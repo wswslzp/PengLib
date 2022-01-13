@@ -126,7 +126,7 @@ object ReadOnlyIdRemapper {
 }
 
 case class ReadOnlyIdSerializer(maxIdNum: Int, outIdWidth: Int, config: Axi4Config) extends ReadOnlyIdDownSizer(maxIdNum, outIdWidth, config) {
-
+  // todo depend on the axi demux
 }
 
 class WriteOnlyIdDownSizer(outIdWidth: Int, config: Axi4Config) extends Module {

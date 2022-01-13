@@ -10,8 +10,8 @@ class mbbrom(wrap: Rom) extends RomBB(wrap.mc) {
 //  this.setDefinitionName()
   val io = new Bundle {
     val CLK = in Bool()
-    val ADR = in UInt(wrap.mc.aw bit)
-    val Q = out Bits(wrap.mc.dw bit)
+    val ADR = in UInt(wrap.mc.addrWidth bit)
+    val Q = out Bits(wrap.mc.dataWidth bit)
     val ME, LS = in Bool()
     val TEST1, RME = in Bool()
     val RM = in Bits(4 bit)

@@ -5,16 +5,16 @@ import spinal.lib._
 
 case class MemConfig
 (
-  dw: Int,
-  aw: Int,
+  dataWidth: Int,
+  addrWidth: Int,
   vendor: MemVendor,
   withBist: Boolean = true,
   withScan: Boolean = false,
   withPowerGate: Boolean = false,
   needBwe: Boolean = false
 ) {
-  val bytePerWord = (dw+7)/8
-  val size = bytePerWord * (1 << aw)
-  var name = vendor.prefixName + "_" + size.toString + "B" // todo: name it according to dw/aw
-  def genBwe: Bits = Bits(dw bit).genIf(needBwe)
+  val bytePerWord = (dataWidth+7)/8
+  val size = bytePerWord * (1 << addrWidth)
+  var name = vendor.prefixName + "_" + "aw" + addrWidth.toString + "_dw" + dataWidth
+  def genBwe: Bits = Bits(dataWidth bit).genIf(needBwe)
 }

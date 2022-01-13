@@ -10,11 +10,11 @@ class mbb1r1w(wrap: Ram1r1w) extends TwoPortBB(wrap.mc) {
   //  this.setDefinitionName()
   val io = new Bundle {
     val CLKA, CLKB = in Bool()
-    val ADRA, ADRB = in UInt(wrap.mc.aw bit)
-    val DA = in Bits(wrap.mc.dw bit)
-    val QB = out Bits(wrap.mc.dw bit)
-    val WEMA, WEMB = if(wrap.mc.needBwe) in Bits(wrap.mc.dw bit) else null
-    val WE, MEA, MEB, TEST1A, TEST1B, RMEA, RMEB, LS = in Bool()
+    val ADRA, ADRB = in UInt(wrap.mc.addrWidth bit)
+    val DA = in Bits(wrap.mc.dataWidth bit)
+    val QB = out Bits(wrap.mc.dataWidth bit)
+    val WEMA, WEMB = if(wrap.mc.needBwe) in Bits(wrap.mc.dataWidth bit) else null
+    val WEA, MEA, MEB, TEST1A, TEST1B, RMEA, RMEB, LS = in Bool()
     val RMA, RMB = in Bits(4 bit)
   }
 
@@ -31,12 +31,12 @@ class mbb1r1w(wrap: Ram1r1w) extends TwoPortBB(wrap.mc) {
     this.io.DA     <> wrap.io.dp.din
     this.io.QB     <> wrap.io.dp.dout
     if(wrap.mc.needBwe){
-      val bwea = if (wrap.mc.needBwe) wrap.io.apa.bwe else B(wrap.mc.dw bit, default -> true)
-      val bweb = if (wrap.mc.needBwe) wrap.io.apb.bwe else B(wrap.mc.dw bit, default -> true)
+      val bwea = if (wrap.mc.needBwe) wrap.io.apa.bwe else B(wrap.mc.dataWidth bit, default -> true)
+      val bweb = if (wrap.mc.needBwe) wrap.io.apb.bwe else B(wrap.mc.dataWidth bit, default -> true)
       this.io.WEMA   <> bwea
       this.io.WEMB   <> bweb
     }
-    this.io.WE    <> wrap.io.dp.we
+    this.io.WEA    <> wrap.io.dp.we
     this.io.MEA    <> wrap.io.apa.cs
     this.io.MEB    <> wrap.io.apb.cs
     this.io.TEST1A := False
