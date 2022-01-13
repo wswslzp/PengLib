@@ -98,7 +98,6 @@ class PhaseSramConverter(globalMemVendor: MemVendor = Huali, policy: MemBlackbox
         mem.component.rework {
           val rd = memTopology.readsSync.head
           val wr = memTopology.writes.head
-          //        val tmpCfg = MemConfig(32, 32, Huali)
           val ram = Ram1r1w(memConfig)
 
           ram.io.clka := rd.clockDomain.readClockWire
@@ -123,7 +122,6 @@ class PhaseSramConverter(globalMemVendor: MemVendor = Huali, policy: MemBlackbox
 
 class PhaseMemTopoPrinter() extends PhaseMemBlackBoxingWithPolicy(blackboxAll) {
   override def doBlackboxing(memTopology: MemTopology) = {
-//    SpinalInfo(s"${this.getClass} is not able to blackbox ${topology.mem}\n  write ports : ${topology.writes.size} \n  readAsync ports : ${topology.readsAsync.size} \n  readSync ports : ${topology.readsSync.size} \n  readWrite ports : ${topology.readWriteSync.size}\n  -> $message")
     SpinalInfo(
       s"""
          |=======================================================
