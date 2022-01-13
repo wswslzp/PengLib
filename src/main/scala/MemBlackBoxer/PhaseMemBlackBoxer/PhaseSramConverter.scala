@@ -7,11 +7,43 @@ import Utils._
 import MemBlackBoxer._
 import MemManager._
 
+object dontBB extends SpinalTag
+
+object blackboxAllWithoutUnusedTag extends MemBlackboxingPolicy {
+  override def translationInterest(topology: MemTopology): Boolean = {
+    if (topology.mem.getTags().contains(dontBB)) false
+    else true
+  }
+
+  override def onUnblackboxable(topology: MemTopology, who: Any, message: String): Unit = generateUnblackboxableError(topology, who, message)
+}
+
+object blackboxAllWithVendorTag extends MemBlackboxingPolicy {
+  override def translationInterest(topology: MemTopology): Boolean = {
+    var ret = false
+    topology.mem.getTags().foreach({
+      case _: MemVendor => ret = true
+      case _=>
+    })
+    ret
+  }
+
+  override def onUnblackboxable(topology: MemTopology, who: Any, message: String): Unit = generateUnblackboxableError(topology, who, message)
+}
+
 //todo add support for multiple vendor support
 //  consider using SpinalTag to annotate the memory.
-class PhaseSramConverter(vendor: MemVendor = Huali) extends PhaseMemBlackBoxingWithPolicy(vendor.policy) {
+class PhaseSramConverter(globalMemVendor: MemVendor = Huali, policy: MemBlackboxingPolicy = blackboxAll) extends PhaseMemBlackBoxingWithPolicy(policy) {
   override def doBlackboxing(memTopology: MemTopology): String = {
     val mem = memTopology.mem
+    def getVendor: MemVendor = {
+      var ret: MemVendor = globalMemVendor
+      mem.getTags().foreach({
+        case v: MemVendor => ret = v
+        case _=>
+      })
+      ret
+    }
     def wrapBool(that: Expression): Bool = that match {
       case that: Bool => that
       case that       =>
@@ -21,7 +53,7 @@ class PhaseSramConverter(vendor: MemVendor = Huali) extends PhaseMemBlackBoxingW
     }
 
     val memConfig = MemConfig(
-      dw = mem.width, aw = mem.addressWidth, vendor = vendor
+      dw = mem.width, aw = mem.addressWidth, vendor = getVendor
     )
 
     getMemType(memTopology) match {

@@ -19,7 +19,7 @@ class mbbrom(wrap: Rom) extends RomBB(wrap.mc) {
 
   val cd = ClockDomain(io.CLK)
 
-  def build(): MemBlackBox = {
+  def connectPort(): MemBlackBox = {
     wrap.clockDomain.setSynchronousWith(cd)
     io.CLK <> wrap.clockDomain.readClockWire
     io.ADR <> wrap.io.addr
@@ -33,4 +33,5 @@ class mbbrom(wrap: Rom) extends RomBB(wrap.mc) {
   }
 
   noIoPrefix()
+//  connectPort()
 }

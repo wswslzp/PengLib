@@ -59,7 +59,6 @@ class Interpolate[T <: Data with Num[T]](val paramValues: Map[List[T], T]) {
    */
   def generate() = new ImplicitArea[T] {
     val cfg = createConfig // set the data type and the dimension.
-    val ppd = getPointPerDim
     cfg.setPointPerDim(getPointPerDim) // set the number of point per dimension.
     val iu = policy.implement(cfg) // implement a interpolate unit according to policy, which contains multiple basic units.
 

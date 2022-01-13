@@ -1,10 +1,7 @@
-package Tree
+package MathLib.Interpolate
 
-import MathLib.Interpolate.{BasicInterpolateUnit, InterpolateUnit, SinglePoint}
 import spinal.core._
-import spinal.lib._
 
-import scala.collection.mutable
 import scala.collection.mutable.ArrayBuffer
 sealed trait Tree[+A]
 
@@ -23,7 +20,7 @@ class IUTreeNode[T <: Data with Num[T]](iu: InterpolateUnit[T]) extends Tree[Int
   def createSon(lv: Int): Unit = {
     if(lv >= 0){
       level = lv
-      unit = iu.getIU(lv)
+      unit = iu.getIU(lv).setName("biu")
       son = List.fill(pointPerDim(lv))(new IUTreeNode[T](iu))
       son.foreach{s=>
         s.father = this
@@ -59,9 +56,6 @@ class IUTree[T <: Data with Num[T]](iu: InterpolateUnit[T]) extends Tree[Interpo
   lazy val paramVector = List.tabulate(dim)(d=>
     ArrayBuffer.fill(pointPerDim(d))(dataType())
   )
-//  lazy val valueVector = List.fill(scala.math.pow(pointPerDim, dim-1).toInt)(
-//    ArrayBuffer.fill(pointPerDim)(dataType())
-//  )
   lazy val valueVector = ArrayBuffer.fill(pointPerDim.product)(dataType())
 
   val root = new IUTreeNode(iu)
@@ -100,7 +94,6 @@ class IUTree[T <: Data with Num[T]](iu: InterpolateUnit[T]) extends Tree[Interpo
         val sp = SinglePoint(dataType())
         sp.param := paramVector(leafDim)(i)
         sp.value := valueVector(i + leaf_idx * pointPerDim(leafDim))
-//        println(s"connecting leaf pv($leaf_idx)($i) to param($leafDim)($i) and value(${i + leaf_idx * pointPerDim(leafDim)})")
         leaf.getNodePvPort(i) := sp
       }
       leaf_idx += 1
@@ -122,19 +115,3 @@ class IUTree[T <: Data with Num[T]](iu: InterpolateUnit[T]) extends Tree[Interpo
   def getOutput = root.getNodeOutput
 }
 
-object IUTree {
-
-  def main(args: Array[String]): Unit = {
-//    val a_tree = new IUTree[UInt, NearestInterpolateUnit[UInt]](2, 2, new NearestInterpolateUnit[UInt](UInt(3 bit)))
-//    a_tree.dataType = UInt(3 bit)
-//
-//    println(s"root is leaf? ${a_tree.root.isLeaf}")
-//    a_tree.traverseTree{leaf=>
-//      println(s"here is leaf")
-//      leaf
-//    }{sons_eff=>
-//      sons_eff.foreach(s=> println(s"current level is ${s.level}"))
-//      sons_eff.head.father
-//    }
-  }
-}

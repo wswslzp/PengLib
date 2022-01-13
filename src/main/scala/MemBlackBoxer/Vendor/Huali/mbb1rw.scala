@@ -18,7 +18,7 @@ class mbb1rw(wrap: Ram1rw) extends SinglePortBB(wrap.mc) {
 
   val cd = ClockDomain(io.CLK)
 
-  def build(): MemBlackBox = {
+  def connectPort(): MemBlackBox = {
     wrap.clockDomain.setSynchronousWith(cd)
     this.io.CLK   <> wrap.clockDomain.readClockWire
     this.io.ADR   <> wrap.io.ap.addr
@@ -38,4 +38,5 @@ class mbb1rw(wrap: Ram1rw) extends SinglePortBB(wrap.mc) {
   }
 
   noIoPrefix()
+//  connectPort()
 }

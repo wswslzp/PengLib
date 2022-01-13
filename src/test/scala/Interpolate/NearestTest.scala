@@ -37,6 +37,17 @@ case class NearestTop1(num: Int = 8) extends Module {
       List(params(i)) -> values(i)
     }
   }.use(Nearest).input(io.x).generate()
+
+  afterElaboration({
+    println("========= Print Statement =============")
+    this.dslBody.walkStatements({s=>
+      println(s + "::" + s.getClass.getSimpleName)
+      s.walkExpression({e=>
+        println(" "*4 +e.toString() + "::" + e.getClass.getSimpleName)
+      })
+    })
+    println("========= Print Done =============")
+  })
 }
 
 /**
@@ -63,7 +74,7 @@ case class NearestTop2(pointPerDim: Int = 3) extends Module {
 
 }
 
-case class NearestTop3(xPoint: Int = 2, yPoint: Int = 4) extends Module {
+case class NearestTop3(xPoint: Int = 3, yPoint: Int = 4) extends Module {
   val xParam = Vector.fill(xPoint)(in SInt(16 bit))
   val yParam = Vector.fill(yPoint)(in SInt(16 bit))
   val values = Vector.fill(xPoint * yPoint)(in SInt(16 bit))
@@ -79,7 +90,7 @@ case class NearestTop3(xPoint: Int = 2, yPoint: Int = 4) extends Module {
       List(xParam(i), yParam(j)) -> values(i + j * xPoint)
     }
 
-  io.f := Interpolate(pvlist).use(Nearest).input(io.x, io.y).generate()
+  io.f := Interpolate(pvlist).use(Linear).input(io.x, io.y).generate()
 }
 
 object NearestTest {

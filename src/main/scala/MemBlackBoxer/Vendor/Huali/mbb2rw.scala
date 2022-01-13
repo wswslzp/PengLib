@@ -21,7 +21,7 @@ class mbb2rw(wrap: Ram2rw) extends DualPortBB(wrap.mc) {
   val cda = ClockDomain(io.CLKA)
   val cdb = ClockDomain(io.CLKB)
 
-  def build(): MemBlackBox = {
+  def connectPort(): MemBlackBox = {
     wrap.cda.setSynchronousWith(cda)
     wrap.cdb.setSynchronousWith(cdb)
     this.io.CLKA   <> wrap.cda.readClockWire
@@ -53,5 +53,5 @@ class mbb2rw(wrap: Ram2rw) extends DualPortBB(wrap.mc) {
   }
 
   noIoPrefix()
-
+//  connectPort()
 }

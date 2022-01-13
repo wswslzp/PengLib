@@ -77,6 +77,7 @@ object MemTest {
     val mem = Mem(Bits(32 bit), 512)
 //    mem(in UInt(9 bit)) := in Bits(32 bit)
     mem.write(in UInt(9 bit), in Bits(32 bit))
+    mem.addTag(dontBB)
 //    out(mem(in UInt(9 bit)))
     out(mem.readSync(in UInt(9 bit)))
   }
@@ -86,9 +87,10 @@ object MemTest {
     val vendor =MemBlackBoxer.MemManager.Huali
     SpinalConfig(
       targetDirectory = "rtl",
-//      memBlackBoxers = mutable.ArrayBuffer(new PhaseSramConverter(vendor))
-      memBlackBoxers = mutable.ArrayBuffer(new PhaseMemTopoPrinter)
-    ).addStandardMemBlackboxing(blackboxAll).generateVerilog(MemToy4())
+      memBlackBoxers = mutable.ArrayBuffer(new PhaseSramConverter(vendor, policy = blackboxAllWithoutUnusedTag)),
+      headerWithDate = true
+//      memBlackBoxers = mutable.ArrayBuffer(new PhaseMemTopoPrinter)
+    ).generateVerilog(MemToy4())
   }
 
 }

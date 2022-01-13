@@ -15,6 +15,6 @@ case class MemConfig
 ) {
   val bytePerWord = (dw+7)/8
   val size = bytePerWord * (1 << aw)
-  var name = vendor.prefixName + "_" + size.toString + "B"
+  var name = vendor.prefixName + "_" + size.toString + "B" // todo: name it according to dw/aw
   def genBwe: Bits = Bits(dw bit).genIf(needBwe)
 }

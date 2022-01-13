@@ -26,26 +26,58 @@ object PPTest {
     b := pp.b
   }
 
-  def main(args: Array[String]): Unit = {
-    SimConfig
-      .withWave
-      .withIVerilog
-      .allOptimisation
-      .workspacePath("tb")
-      .compile(PPP())
-      .doSim("test"){dut=>
-        import dut._
-        clockDomain.forkStimulus(2)
-        a #= 0
-        clockDomain.waitSampling()
+  case class P4() extends Module {
+    val a = in UInt(8 bit)
+    val b = out UInt(8 bit)
 
-        for(i <- 0 to 9){
-          a #= i + 3
-          clockDomain.waitSampling()
-        }
-        clockDomain.waitSampling(100)
-        simSuccess()
-      }
+    val aclk = ClockDomain.external("a")
+    val a1 = UInt(8 bit)
+    aclk {
+      a1 := Delay(a, 8)
+    }
+
+    val bclk = ClockDomain.external("b")
+    val a2 = UInt(8 bit)
+    bclk {
+      a2 := Delay(BufferCC(a1), 4)
+    }
+
+    b := BufferCC(a2)
+  }
+
+  case class P5() extends Module {
+    val a = in UInt(8 bit)
+    val b = out UInt(8 bit)
+    val en = in Bool()
+
+    val a1 = Delay(a, 1, init = a.getZero)
+    val d4 = new ClockEnableArea(en){
+      b := Delay(a1, 2, init = a1.getZero)
+    }
+  }
+
+  def main(args: Array[String]): Unit = {
+//    SimConfig
+//      .withWave
+//      .withIVerilog
+//      .allOptimisation
+//      .workspacePath("tb")
+//      .compile(PPP())
+//      .doSim("test"){dut=>
+//        import dut._
+//        clockDomain.forkStimulus(2)
+//        a #= 0
+//        clockDomain.waitSampling()
+//
+//        for(i <- 0 to 9){
+//          a #= i + 3
+//          clockDomain.waitSampling()
+//        }
+//        clockDomain.waitSampling(100)
+//        simSuccess()
+//      }
+
+    PrintRTL("rtl")(P5())
   }
 
 }

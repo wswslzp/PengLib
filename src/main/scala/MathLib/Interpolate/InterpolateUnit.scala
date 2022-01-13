@@ -1,6 +1,5 @@
 package MathLib.Interpolate
 
-import Tree._
 import spinal.core._
 
 /**
@@ -21,7 +20,6 @@ class GridPoint[T<:Data with Num[T]](cfg: InterpolateConfig[T]) extends Bundle {
  * @tparam T data type
  */
 sealed abstract class InterpolateUnit[T <: Data with Num[T]](cfg: InterpolateConfig[T]) extends Component {
-//  var paramValuePorts: SquareGridPoint[T] = _
   var paramValuePorts: GridPoint[T] = _
 
   var xs: Vec[T] = _
@@ -42,7 +40,6 @@ sealed abstract class InterpolateUnit[T <: Data with Num[T]](cfg: InterpolateCon
     // create a new BIU tree
     val tree = new IUTree(this)
 
-//    val ports = cfg.sqPointPerDim
     // connect the io ports to the cfg.data vector
     for(d <- 0 until cfg.totalDim){
       tree.inputVector(d) = xs(d) // connect input
@@ -50,11 +47,6 @@ sealed abstract class InterpolateUnit[T <: Data with Num[T]](cfg: InterpolateCon
         tree.paramVector(d)(p) = paramValuePorts.params(d)(p)
       }
     }
-//    for(cluster <- tree.valueVector.indices){
-//      for(p <- 0 until ports){
-//        tree.valueVector(cluster)(p) = paramValuePorts.value(cluster * ports + p)
-//      }
-//    }
     for(valIndex <- tree.valueVector.indices){
       tree.valueVector(valIndex) = paramValuePorts.values(valIndex)
     }
@@ -69,16 +61,16 @@ sealed abstract class InterpolateUnit[T <: Data with Num[T]](cfg: InterpolateCon
 }
 
 class NearestInterpolateUnit[T <: Data with Num[T]](cfg: InterpolateConfig[T]) extends InterpolateUnit[T](cfg){
-  override def getIU(dim: Int) = new NearestBIU[T](cfg, dim).setWeakName("NearestBIU")
+  override def getIU(dim: Int) = new NearestBIU[T](cfg, dim)
   override type RefOwnerType = this.type
 }
 
 class LinearInterpolateUnit[T <: Data with Num[T]](cfg: InterpolateConfig[T]) extends InterpolateUnit[T](cfg){
-  override def getIU(dim: Int) = new LinearBIU[T](cfg, dim).setWeakName("LinearBIU")
+  override def getIU(dim: Int) = new LinearBIU[T](cfg, dim)
   override type RefOwnerType = this.type
 }
 
 class CubicInterpolateUnit[T <: Data with Num[T]](cfg: InterpolateConfig[T]) extends InterpolateUnit[T](cfg){
-  override def getIU(dim: Int) = new CubicBIU[T](cfg, dim).setWeakName("CubicBIU")
+  override def getIU(dim: Int) = new CubicBIU[T](cfg, dim)
   override type RefOwnerType = this.type
 }

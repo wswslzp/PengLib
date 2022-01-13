@@ -5,7 +5,7 @@ import spinal.core._
 trait MemBlackBox extends BlackBox {
 //  setBlackBoxName(mem_cfg.name)
 
-  def build(): MemBlackBox
+  def connectPort(): MemBlackBox
   protected var name: String
 
   addPrePopTask(() => setBlackBoxName(name))
