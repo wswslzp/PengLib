@@ -82,7 +82,7 @@ case class Ram2rw(mc: MemConfig) extends MemWrapper(mc) {
 case class Rom(mc: MemConfig) extends MemWrapper(mc) {
   val io = new Bundle {
     val cs, wr = in Bool()
-    val bwe = mc.genBwe
+    val bwe = mc.genMask
     val addr = in UInt(mc.addrWidth bit)
     val rdata = in Bits(mc.dataWidth bit)
   }

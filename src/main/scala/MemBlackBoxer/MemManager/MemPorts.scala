@@ -9,11 +9,11 @@ class MemPorts extends Bundle {
 
 case class AddrCtrlPorts(mc: MemConfig) extends MemPorts with IMasterSlave {
   val cs = Bool()
-  val bwe = if(mc.needBwe) Bits(mc.dataWidth bit) else null
+  val mask = mc.genMask
   val addr = UInt(mc.addrWidth bit)
 
   override def asMaster(): Unit = {
-    in(cs, bwe, addr)
+    in(cs, mask, addr)
     in(cs, addr)
   }
 }

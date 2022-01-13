@@ -51,7 +51,9 @@ class PhaseSramConverter(globalMemVendor: MemVendor = Huali, policy: MemBlackbox
     }
 
     val memConfig = MemConfig(
-      dataWidth = mem.width, depth = mem.wordCount, vendor = getVendor
+      dataWidth = mem.width,
+      depth = mem.wordCount,
+      vendor = getVendor
     )
 
     getMemType(memTopology) match {
@@ -65,7 +67,11 @@ class PhaseSramConverter(globalMemVendor: MemVendor = Huali, policy: MemBlackbox
           ram.io.ap.cs.assignFrom(wrapBool(port.chipSelect) && port.clockDomain.isClockEnableActive)
           ram.io.dp.we.assignFrom(port.writeEnable)
           ram.io.dp.din.assignFrom(port.data)
-          // todo mask write
+          if (port.mask != null) {
+            ram.io.ap.mask.assignFrom(port.mask)
+          } else {
+            ram.io.ap.mask.setAllTo(true)
+          }
           wrapConsumers(memTopology, port, ram.io.dp.dout)
 
           removeMem(mem)
@@ -82,6 +88,11 @@ class PhaseSramConverter(globalMemVendor: MemVendor = Huali, policy: MemBlackbox
           ram.io.apa.cs.assignFrom(wrapBool(portA.chipSelect) && portA.clockDomain.isClockEnableActive)
           ram.io.dpa.we.assignFrom(portA.writeEnable)
           ram.io.dpa.din.assignFrom(portA.data)
+          if (portA.mask != null) {
+            ram.io.apa.mask.assignFrom(portA.mask)
+          } else {
+            ram.io.apa.mask.setAllTo(true)
+          }
           wrapConsumers(memTopology, portA, ram.io.dpa.dout)
 
           ram.io.clkb := portB.clockDomain.readClockWire
@@ -89,6 +100,11 @@ class PhaseSramConverter(globalMemVendor: MemVendor = Huali, policy: MemBlackbox
           ram.io.apb.cs.assignFrom(wrapBool(portB.chipSelect) && portB.clockDomain.isClockEnableActive)
           ram.io.dpb.we.assignFrom(portB.writeEnable)
           ram.io.dpb.din.assignFrom(portB.data)
+          if (portB.mask != null) {
+            ram.io.apb.mask.assignFrom(portB.mask)
+          } else {
+            ram.io.apb.mask.setAllTo(true)
+          }
           wrapConsumers(memTopology, portB, ram.io.dpb.dout)
 
           removeMem(mem)
@@ -102,14 +118,20 @@ class PhaseSramConverter(globalMemVendor: MemVendor = Huali, policy: MemBlackbox
 
           ram.io.clka := rd.clockDomain.readClockWire
           ram.io.apa.addr.assignFrom(rd.address)
-          ram.io.apb.cs.assignFrom(rd.clockDomain.isClockEnableActive && wrapBool(rd.readEnable))
+          ram.io.apa.cs.assignFrom(rd.clockDomain.isClockEnableActive && wrapBool(rd.readEnable))
+          ram.io.apa.mask.setAllTo(true)
           wrapConsumers(memTopology, rd, ram.io.dp.dout)
 
           ram.io.clkb := wr.clockDomain.readClockWire
           ram.io.apb.addr.assignFrom(wr.address)
-          ram.io.apa.cs.assignFrom(wr.clockDomain.isClockEnableActive && wrapBool(wr.writeEnable))
+          ram.io.apb.cs.assignFrom(wr.clockDomain.isClockEnableActive && wrapBool(wr.writeEnable))
           ram.io.dp.we.assignFrom(wrapBool(wr.writeEnable))
           ram.io.dp.din.assignFrom(wr.data)
+          if (wr.mask != null) {
+            ram.io.apb.mask.assignFrom(wr.mask)
+          } else {
+            ram.io.apb.mask setAllTo true
+          }
 
           removeMem(mem)
         }

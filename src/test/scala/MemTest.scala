@@ -76,8 +76,8 @@ object MemTest {
   case class MemToy4() extends Module {
     val mem = Mem(Bits(32 bit), 512)
 //    mem(in UInt(9 bit)) := in Bits(32 bit)
-    mem.write(in UInt(9 bit), in Bits(32 bit))
-    mem.addTag(dontBB)
+    mem.write(in UInt(9 bit), in Bits(32 bit), mask = in Bits(32 bit))
+//    mem.addTag(dontBB)
 //    out(mem(in UInt(9 bit)))
     out(mem.readSync(in UInt(9 bit)))
   }
