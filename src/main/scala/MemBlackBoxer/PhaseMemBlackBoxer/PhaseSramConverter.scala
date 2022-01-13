@@ -51,7 +51,7 @@ class PhaseSramConverter(globalMemVendor: MemVendor = Huali, policy: MemBlackbox
     }
 
     val memConfig = MemConfig(
-      dataWidth = mem.width, addrWidth = mem.addressWidth, vendor = getVendor
+      dataWidth = mem.width, depth = mem.wordCount, vendor = getVendor
     )
 
     getMemType(memTopology) match {
