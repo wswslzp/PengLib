@@ -103,12 +103,12 @@ class PhaseSramConverter(globalMemVendor: MemVendor = Huali, policy: MemBlackbox
 
           ram.io.clka := rd.clockDomain.readClockWire
           ram.io.apa.addr.assignFrom(rd.address)
-          ram.io.apa.cs.assignFrom(rd.clockDomain.isClockEnableActive && wrapBool(wr.writeEnable))
+          ram.io.apb.cs.assignFrom(rd.clockDomain.isClockEnableActive && wrapBool(rd.readEnable))
           wrapConsumers(memTopology, rd, ram.io.dp.dout)
 
           ram.io.clkb := wr.clockDomain.readClockWire
           ram.io.apb.addr.assignFrom(wr.address)
-          ram.io.apb.cs.assignFrom(wr.clockDomain.isClockEnableActive && wrapBool(rd.readEnable))
+          ram.io.apa.cs.assignFrom(wr.clockDomain.isClockEnableActive && wrapBool(wr.writeEnable))
           ram.io.dp.we.assignFrom(wrapBool(wr.writeEnable))
           ram.io.dp.din.assignFrom(wr.data)
 
