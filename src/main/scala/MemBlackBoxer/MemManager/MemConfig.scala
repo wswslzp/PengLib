@@ -3,6 +3,8 @@ package MemBlackBoxer.MemManager
 import spinal.core._
 import spinal.lib._
 
+import scala.language.postfixOps
+
 case class MemConfig
 (
   dataWidth: Int,
@@ -16,6 +18,6 @@ case class MemConfig
   val addrWidth = log2Up(depth)
   val bytePerWord = (dataWidth+7)/8
   val size = bytePerWord * (1 << addrWidth)
-  var name = vendor.prefixName + "_" + "aw" + addrWidth.toString + "_dw" + dataWidth
+  var name = vendor.prefixName + "_wc" + depth.toString + "_dw" + dataWidth
   def genMask: Bits = Bits(dataWidth bit)
 }

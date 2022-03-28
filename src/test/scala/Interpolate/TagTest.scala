@@ -8,6 +8,7 @@ import scala.language._
 import Util._
 import spinal.core.internals._
 
+import scala.language.{postfixOps, _}
 object DataTag extends SpinalTag
 
 case class Add1(width: Int) extends Module {

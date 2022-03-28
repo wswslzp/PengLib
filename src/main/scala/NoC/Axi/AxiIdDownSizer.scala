@@ -2,7 +2,8 @@ package NoC.Axi
 
 import spinal.core._
 import spinal.lib._
-import scala.language._
+
+import scala.language.{postfixOps, _}
 import bus.amba4.axi._
 
 /**

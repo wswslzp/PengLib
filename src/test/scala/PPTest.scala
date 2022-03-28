@@ -1,4 +1,5 @@
 import spinal.core._
+import scala.language.{postfixOps, _}
 import spinal.core.sim._
 import spinal.lib._
 import scala.language._
@@ -56,6 +57,17 @@ object PPTest {
     }
   }
 
+  case class P6() extends Module {
+    val a, b, c = in UInt(8 bit)
+    val d, e = out UInt(12 bit)
+    (d, e) := (a, b, c).asBits
+  }
+
+  case class P7() extends Module {
+    val a,b = Vec.fill(8)(in UInt(8 bit))
+    val mac = (a, b).zipped.map(_ * _).reduceBalancedTree(_ + _) asOutput() setAsReg()
+  }
+
   def main(args: Array[String]): Unit = {
 //    SimConfig
 //      .withWave
@@ -77,7 +89,7 @@ object PPTest {
 //        simSuccess()
 //      }
 
-    PrintRTL("rtl")(P5())
+    PrintRTL("rtl")(P7())
   }
 
 }

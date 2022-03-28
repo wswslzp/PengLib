@@ -3,6 +3,7 @@ import spinal.core.sim._
 import spinal.lib._
 import bus.amba4.axi._
 
+import scala.language.postfixOps
 import java.io.File
 import scala.collection.mutable
 import MemBlackBoxer.PhaseMemBlackBoxer._
@@ -77,7 +78,7 @@ object MemTest {
     val mem = Mem(Bits(32 bit), 512)
 //    mem(in UInt(9 bit)) := in Bits(32 bit)
     mem.write(in UInt(9 bit), in Bits(32 bit), mask = in Bits(32 bit))
-//    mem.addTag(dontBB)
+    mem.addTag(dontBB)
 //    out(mem(in UInt(9 bit)))
     out(mem.readSync(in UInt(9 bit)))
   }

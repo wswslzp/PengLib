@@ -2,16 +2,17 @@ package MathLib.FFT
 
 import spinal.core._
 import spinal.lib._
-
 import Util._
 import MathLib.Number._
+
+import scala.language.postfixOps
 
 case class FFT2D(cfg: FFTConfig) extends Module {
   import FFT1D.fft
 
   case class ColAddrArea(use_pip: Boolean) extends Component {
     val row_addr_ov = in Bool()
-    val fft_out_vld = in Bool() allowPruning()
+    val fft_out_vld = in Bool() //allowPruning()
     val col_addr = out UInt(log2Up(cfg.point) bit)
     val col_addr_vld = out Bool()
 

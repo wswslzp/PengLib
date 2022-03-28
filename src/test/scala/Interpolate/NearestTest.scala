@@ -6,6 +6,7 @@ import spinal.core.sim._
 import spinal.lib._
 
 import scala.language._
+import scala.language.{postfixOps, _}
 import Util._
 
 case class NearestTop(num: Int = 4) extends Module {

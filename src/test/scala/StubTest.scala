@@ -2,6 +2,7 @@ import spinal.core._
 import spinal.core.sim._
 import spinal.lib._
 import scala.language._
+import scala.language.{postfixOps, _}
 
 object StubTest {
 
@@ -15,19 +16,6 @@ object StubTest {
     //    val c = prod.map(p=> out(~p))
     //    val c = prod.view.map(p => ~p).map(_.resize(12)).map(out(_)).toVector
 
-    def stub: this.type = this rework {
-      this.children.clear()
-      this.dslBody.foreachStatements({
-        case bt: BaseType if !bt.isDirectionLess =>
-        case s => s.removeStatement()
-      })
-      this.dslBody.foreachStatements({
-        case bt: BaseType if bt.isOutputOrInOut =>
-          bt := bt.getZero
-        case _=>
-      })
-      this
-    }
   }
 
   def main(args: Array[String]): Unit = {
