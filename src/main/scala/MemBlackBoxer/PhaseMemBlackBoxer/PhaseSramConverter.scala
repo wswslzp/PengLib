@@ -6,6 +6,7 @@ import internals._
 import Utils._
 import MemBlackBoxer._
 import MemManager._
+import Vendor._
 
 object dontBB extends SpinalTag
 
@@ -31,7 +32,7 @@ object blackboxAllWithVendorTag extends MemBlackboxingPolicy {
   override def onUnblackboxable(topology: MemTopology, who: Any, message: String): Unit = generateUnblackboxableError(topology, who, message)
 }
 
-class PhaseSramConverter(globalMemVendor: MemVendor = Huali, policy: MemBlackboxingPolicy = blackboxAll) extends PhaseMemBlackBoxingWithPolicy(policy) {
+class PhaseSramConverter(globalMemVendor: MemVendor = Vendor.Huali, policy: MemBlackboxingPolicy = blackboxAll) extends PhaseMemBlackBoxingWithPolicy(policy) {
   override def doBlackboxing(memTopology: MemTopology): String = {
     val mem = memTopology.mem
     def getVendor: MemVendor = {
@@ -63,16 +64,16 @@ class PhaseSramConverter(globalMemVendor: MemVendor = Huali, policy: MemBlackbox
           val port = memTopology.readWriteSync.head
           val ram = Ram1rw(memConfig)
 
-          ram.io.ap.addr.assignFrom(port.address)
-          ram.io.ap.cs.assignFrom(wrapBool(port.chipSelect) && port.clockDomain.isClockEnableActive)
-          ram.io.dp.we.assignFrom(port.writeEnable)
-          ram.io.dp.din.assignFrom(port.data)
+          ram.io.ap.address.assignFrom(port.address)
+          ram.io.ap.memoryEnable.assignFrom(wrapBool(port.chipSelect) && port.clockDomain.isClockEnableActive)
+          ram.io.dp.writeEnable.assignFrom(port.writeEnable)
+          ram.io.dp.writeData.assignFrom(port.data)
           if (port.mask != null) {
             ram.io.ap.mask.assignFrom(port.mask)
           } else {
             ram.io.ap.mask.setAllTo(true)
           }
-          wrapConsumers(memTopology, port, ram.io.dp.dout)
+          wrapConsumers(memTopology, port, ram.io.dp.readData)
 
           removeMem(mem)
         }
@@ -84,28 +85,28 @@ class PhaseSramConverter(globalMemVendor: MemVendor = Huali, policy: MemBlackbox
           val ram = Ram2rw(memConfig)
 
           ram.io.clka := portA.clockDomain.readClockWire
-          ram.io.apa.addr.assignFrom(portA.address)
-          ram.io.apa.cs.assignFrom(wrapBool(portA.chipSelect) && portA.clockDomain.isClockEnableActive)
-          ram.io.dpa.we.assignFrom(portA.writeEnable)
-          ram.io.dpa.din.assignFrom(portA.data)
+          ram.io.apa.address.assignFrom(portA.address)
+          ram.io.apa.memoryEnable.assignFrom(wrapBool(portA.chipSelect) && portA.clockDomain.isClockEnableActive)
+          ram.io.dpa.writeEnable.assignFrom(portA.writeEnable)
+          ram.io.dpa.writeData.assignFrom(portA.data)
           if (portA.mask != null) {
             ram.io.apa.mask.assignFrom(portA.mask)
           } else {
             ram.io.apa.mask.setAllTo(true)
           }
-          wrapConsumers(memTopology, portA, ram.io.dpa.dout)
+          wrapConsumers(memTopology, portA, ram.io.dpa.readData)
 
           ram.io.clkb := portB.clockDomain.readClockWire
-          ram.io.apb.addr.assignFrom(portB.address)
-          ram.io.apb.cs.assignFrom(wrapBool(portB.chipSelect) && portB.clockDomain.isClockEnableActive)
-          ram.io.dpb.we.assignFrom(portB.writeEnable)
-          ram.io.dpb.din.assignFrom(portB.data)
+          ram.io.apb.address.assignFrom(portB.address)
+          ram.io.apb.memoryEnable.assignFrom(wrapBool(portB.chipSelect) && portB.clockDomain.isClockEnableActive)
+          ram.io.dpb.writeEnable.assignFrom(portB.writeEnable)
+          ram.io.dpb.writeData.assignFrom(portB.data)
           if (portB.mask != null) {
             ram.io.apb.mask.assignFrom(portB.mask)
           } else {
             ram.io.apb.mask.setAllTo(true)
           }
-          wrapConsumers(memTopology, portB, ram.io.dpb.dout)
+          wrapConsumers(memTopology, portB, ram.io.dpb.readData)
 
           removeMem(mem)
         }
@@ -117,16 +118,16 @@ class PhaseSramConverter(globalMemVendor: MemVendor = Huali, policy: MemBlackbox
           val ram = Ram1r1w(memConfig)
 
           ram.io.clka := rd.clockDomain.readClockWire
-          ram.io.apa.addr.assignFrom(rd.address)
-          ram.io.apa.cs.assignFrom(rd.clockDomain.isClockEnableActive && wrapBool(rd.readEnable))
+          ram.io.apa.address.assignFrom(rd.address)
+          ram.io.apa.memoryEnable.assignFrom(rd.clockDomain.isClockEnableActive && wrapBool(rd.readEnable))
           ram.io.apa.mask.setAllTo(true)
-          wrapConsumers(memTopology, rd, ram.io.dp.dout)
+          wrapConsumers(memTopology, rd, ram.io.dp.readData)
 
           ram.io.clkb := wr.clockDomain.readClockWire
-          ram.io.apb.addr.assignFrom(wr.address)
-          ram.io.apb.cs.assignFrom(wr.clockDomain.isClockEnableActive && wrapBool(wr.writeEnable))
-          ram.io.dp.we.assignFrom(wrapBool(wr.writeEnable))
-          ram.io.dp.din.assignFrom(wr.data)
+          ram.io.apb.address.assignFrom(wr.address)
+          ram.io.apb.memoryEnable.assignFrom(wr.clockDomain.isClockEnableActive && wrapBool(wr.writeEnable))
+          ram.io.dp.writeEnable.assignFrom(wrapBool(wr.writeEnable))
+          ram.io.dp.writeData.assignFrom(wr.data)
           if (wr.mask != null) {
             ram.io.apb.mask.assignFrom(wr.mask)
           } else {

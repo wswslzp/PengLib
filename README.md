@@ -9,6 +9,8 @@ Collecting some infrastructure library in SpinalHDL. The feature of this library
 
 ## SRAM converter
 
+### Overview
+
 We can insert a SpinalHDL phase to convert the `Mem` into vendor-specific SRAM.
 For example, we have a module `MemToy` as follows:
 ```scala
@@ -28,7 +30,7 @@ case class MemToy() extends Component {
 }
 def main(args: Array[String]): Unit = {
   new File("rtl").mkdir()
-  val vendor =MemBlackBoxer.MemManager.Huali
+  val vendor = MemBlackBoxer.Vendor.Huali
   SpinalConfig(
     targetDirectory = "rtl",
     memBlackBoxers = mutable.ArrayBuffer(new PhaseSramConverter(vendor))
@@ -58,7 +60,61 @@ As an example, the `Huali` vendor object and its SRAM blackboxes are already inc
 
 The default memory blackboxer policy used in `MemVendor` is `blackboxAll`, implemented in `spinal.core`. You can change the default policy to change the way in which the SRAM is blackboxed. 
 
+### Memory Wrapping Flow
+
+To provide a unified memory interface, this memory converter creates memory wrappers for all the `Mem` instance. 
+You can also use the `MemWrapper` feature directly, without inserting memory blackboxing phases.
+
+A memory wrapper (class of `MemWrapper`) is a hardware module that connects the unified memory interface to the specific SRAM instance's ports,
+which are various for different memory vendor. 
+It contains a memory blackbox representing the true SRAM instance named `ram`.
+
+This inner blackbox `ram` is created by `build` method of the `MemVendor`. 
+It's a SRAM instance of a specific memory vendor like `Huali`.
+And it will be built by passing `this` memory wrapper as parameter.
+
+This `build` flow will not only create memory instance, but also handle the connection between SRAM ports and the unifed interface
+(this is why it needs the reference to the wrapper).
+
+Because there are usually four types of memory: single port SRAM, dual port SRAM, two port SRAM and ROM,
+there are also four types of memory wrapper for each SRAM type.
+
+As in [Huali.build()](src/main/scala/MemBlackBoxer/MemManager/MemVendor.scala),
+
+### Memory Vendor System
+
+For memory vendor, you need to provide a specific SRAM vendor object that extends `MemVendor` trait. 
+There are two mandatory methods you have to implement, as above discussed.
+
+**Build** 
+
+`build` function has a parameter of type `MemWrapper`. 
+`build` function check which memory type the wrapper is and create the corresponding memory blackbox that represents the SRAM hardware model.
+
+This method should be simplified because for all memory vendors it will always seem to be the same.
+
+**Prefix**
+
+A prefix name should be provided. 
+
+### Memory Tags
+
+You can specify different memory vendors in your design. 
+In some cases, you have several `Mem` instances but some of them  
+belong to vendor A, some belong to B and some should be pure register file.
+
+Then you can change the default memory blackbox policy `blackboxAll` to following policies:
+* `blackboxAllWithVendorTag`, the policy that will not blackbox the memory by default, except for tagged memory.
+* `blackboxAllWithoutUnusedTag`, the policy that will blackbox all the memory by default, except for those tagged with `dontBB`.
+
+The policy can be passed to `PhaseSramConverter` as a parameter.
+
+You can tag the memory with a specific `MemVendor`. 
+
+### TODO
+
 There are still some features todo:
+* Improve `MemVendor` trait, like move `build` method up to `MemVendor`.
 * The connection of the MBIST port of the SRAM.
 * The BIST logic implementation. 
 * The low power port connection.

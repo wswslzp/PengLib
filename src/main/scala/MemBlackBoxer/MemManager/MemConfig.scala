@@ -1,7 +1,6 @@
 package MemBlackBoxer.MemManager
 
 import spinal.core._
-import spinal.lib._
 
 import scala.language.postfixOps
 
@@ -9,7 +8,6 @@ case class MemConfig
 (
   dataWidth: Int,
   depth: Int,
-  //  addrWidth: Int,
   vendor: MemVendor,
   withBist: Boolean = true,
   withScan: Boolean = false,

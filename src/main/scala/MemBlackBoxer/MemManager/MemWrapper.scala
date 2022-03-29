@@ -11,10 +11,6 @@ import MemBlackBoxer._
 abstract class MemWrapper(mc: MemConfig) extends Component {
   val ram: MemBlackBox// = mc.vendor.build(this)
   def addSimulationModel(fileName: String): Unit = ram.addRTLPath(fileName)
-
-//  def getRamBlackBox: MemBlackBox = this match {
-//    case bb: Ram1rw =>
-//  }
 }
 
 /**

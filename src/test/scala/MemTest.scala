@@ -7,7 +7,6 @@ import scala.language.postfixOps
 import java.io.File
 import scala.collection.mutable
 import MemBlackBoxer.PhaseMemBlackBoxer._
-import spinal.core.internals.Operator
 
 object MemTest {
 
@@ -35,16 +34,16 @@ object MemTest {
 
   case class MemToy2() extends Component {
     import MemBlackBoxer.MemManager._
-    val mem = Ram1r1w(MemConfig(32, 32, Huali))
+    val mem = Ram1r1w(MemConfig(32, 32, MemBlackBoxer.Vendor.Huali))
     mem.io.clka := clockDomain.readClockWire
     mem.io.clkb := clockDomain.readClockWire
 
-    mem.io.apa.addr := 43
-    mem.io.apa.cs := True
-    mem.io.apb.addr := 43
-    mem.io.apb.cs := True
-    mem.io.dp.din := 0xabcd
-    mem.io.dp.we := True
+    mem.io.apa.address := 43
+    mem.io.apa.memoryEnable := True
+    mem.io.apb.address := 43
+    mem.io.apb.memoryEnable := True
+    mem.io.dp.writeData := 0xabcd
+    mem.io.dp.writeEnable := True
 
   }
 
@@ -78,14 +77,15 @@ object MemTest {
     val mem = Mem(Bits(32 bit), 512)
 //    mem(in UInt(9 bit)) := in Bits(32 bit)
     mem.write(in UInt(9 bit), in Bits(32 bit), mask = in Bits(32 bit))
-    mem.addTag(dontBB)
+//    mem.addTag(dontBB)
 //    out(mem(in UInt(9 bit)))
     out(mem.readSync(in UInt(9 bit)))
   }
 
   def main(args: Array[String]): Unit = {
+    import MemBlackBoxer.Vendor.Huali
     new File("rtl").mkdir()
-    val vendor =MemBlackBoxer.MemManager.Huali
+    val vendor = Huali
     SpinalConfig(
       targetDirectory = "rtl",
       memBlackBoxers = mutable.ArrayBuffer(new PhaseSramConverter(vendor, policy = blackboxAllWithoutUnusedTag)),
