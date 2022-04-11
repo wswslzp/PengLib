@@ -31,18 +31,23 @@ case class MemToy() extends Component {
 def main(args: Array[String]): Unit = {
   new File("rtl").mkdir()
   val vendor = MemBlackBoxer.Vendor.Huali
-  SpinalConfig(
-    targetDirectory = "rtl",
-    memBlackBoxers = mutable.ArrayBuffer(new PhaseSramConverter(vendor))
-  ).generateVerilog(MemToy())
+  val config = SpinalConfig(
+    targetDirectory = "rtl"
+  )
+  config.addTransformationPhase(
+    new PhaseSramConverter(vendor, policy = blackboxAll)
+  )
+  config.generateVerilog(MemToy())
 }
 ```
 Inside the `MemToy`, a module named `Axi4SharedOnChipRam` is instantiated as `mem`. A `Mem` object `ram` is inside the module,
 and it will be generated as an register array like `reg [31:0] ram[512];`.
 
-If we want to generate an SRAM instead of a Verilog register array, we can pass a SRAM converter
-`PhaseSramConverter` to `SpinalConfig` as above. You don't have to change any line of your original RTL source code (sure you cannot change the 
-implementation of the class in `spinal.lib`).
+If we want to generate an SRAM instead of a Verilog register array, 
+we can pass a SRAM converter `PhaseSramConverter` to `SpinalConfig` as above,
+or use `addTransformationPhase` method of `SpinalConfig`.
+You don't have to change any line of your original RTL source code 
+(sure you cannot change the implementation of the class in `spinal.lib`).
 
 The `PhaseSramConverter` takes a parameter that specifies the SRAM vendor. It depends on which 
 memory compiler you are using. Here as an example the `Huali` memory compiler is used. 
@@ -56,7 +61,9 @@ The following steps are **mandatory**:
 1. Implement the memory blackbox by extending `SinglePortBB`/`DualPortBB`/`TwoPortBB`/`RomBB`. Declare the SRAM port and connect them to memory wrapper in `build()`.
 2. Implement the vendor object by extending `MemVendor`. Provide the prefix of the name or even use your own name convention. Implement corresponding `build()` function.
 
-As an example, the `Huali` vendor object and its SRAM blackboxes are already included in [MemVendor](src/main/scala/MemBlackBoxer/MemManager/MemVendor.scala) and [Vendor.Huali](src/main/scala/MemBlackBoxer/Vendor/Huali).
+As an example, the `Huali` vendor object and its SRAM blackboxes are already included in 
+[MemVendor](src/main/scala/MemBlackBoxer/MemManager/MemVendor.scala) and 
+[Vendor.Huali](src/main/scala/MemBlackBoxer/Vendor/Huali.scala).
 
 The default memory blackboxer policy used in `MemVendor` is `blackboxAll`, implemented in `spinal.core`. You can change the default policy to change the way in which the SRAM is blackboxed. 
 
@@ -79,12 +86,16 @@ This `build` flow will not only create memory instance, but also handle the conn
 Because there are usually four types of memory: single port SRAM, dual port SRAM, two port SRAM and ROM,
 there are also four types of memory wrapper for each SRAM type.
 
-As in [Huali.build()](src/main/scala/MemBlackBoxer/MemManager/MemVendor.scala),
+As in [Huali.build()](src/main/scala/MemBlackBoxer/Vendor/Huali.scala),
 
 ### Memory Vendor System
 
 For memory vendor, you need to provide a specific SRAM vendor object that extends `MemVendor` trait. 
+
+The example for `Huali` vendor has been shown  as above.
+
 There are two mandatory methods you have to implement, as above discussed.
+And four type of memory hardware model should be implemented.
 
 **Build** 
 
@@ -96,6 +107,20 @@ This method should be simplified because for all memory vendors it will always s
 **Prefix**
 
 A prefix name should be provided. 
+
+**Memory Blackbox**
+
+`build` function builds four types of memory. 
+So you have to implement these four `Blackbox` of memory in the vendor `object`.
+The memory blackboxes extends a specific memory type, as following:
+* `SinglePortBB` - For single port SRAM, one read-write port.
+* `DualPortBB` - For dual port SRAM, one read-only port and one write-only port.
+* `TwoPortBB` - For two port SRAM, two read-write ports.
+* `RomBB` - For ROM.
+
+You don't have actually to implement all these four types, 
+or you can implement some memory type that doesn't even exist as above.
+It depends on how you implement the `build` function of the vendor `object`.
 
 ### Memory Tags
 

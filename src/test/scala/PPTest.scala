@@ -68,6 +68,18 @@ object PPTest {
     val mac = (a, b).zipped.map(_ * _).reduceBalancedTree(_ + _) asOutput() setAsReg()
   }
 
+  case class P8() extends Module {
+    val data = in(Bits(64 bits))
+    val outData = out(UInt(64 bits))
+    report(L"out data is $outData")
+
+    data.subdivideIn(4 slices)
+    outData := data.subdivideIn(8 bits).shuffle { i =>
+      val total = data.getWidth / 8
+      total - 1 -i
+    }.asBits.asUInt
+  }
+
   def main(args: Array[String]): Unit = {
 //    SimConfig
 //      .withWave
@@ -89,7 +101,7 @@ object PPTest {
 //        simSuccess()
 //      }
 
-    PrintRTL("rtl")(P7())
+    PrintRTL("rtl")(P8())
   }
 
 }

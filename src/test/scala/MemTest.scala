@@ -88,10 +88,10 @@ object MemTest {
     val vendor = Huali
     SpinalConfig(
       targetDirectory = "rtl",
-      memBlackBoxers = mutable.ArrayBuffer(new PhaseSramConverter(vendor, policy = blackboxAllWithoutUnusedTag)),
       headerWithDate = true
-//      memBlackBoxers = mutable.ArrayBuffer(new PhaseMemTopoPrinter)
-    ).generateVerilog(MemToy4())
+    )
+      .addTransformationPhase(new PhaseSramConverter(vendor, policy = blackboxAllWithoutUnusedTag))
+      .generateVerilog(MemToy4())
   }
 
 }
