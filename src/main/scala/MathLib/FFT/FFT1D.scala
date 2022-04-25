@@ -47,7 +47,7 @@ case class FFT1D(cfg: FFTConfig, serial: Boolean = false) extends Component {
   val rr =  LL.map(length / _)
   val LL2 =  LL.map(_ / 2)
 
-  if (cfg.col_pipeline) {
+  if (cfg.col_pipeline) new AreaRoot{
     val data_mid =  Reg(Vec(cloneOf(data_in), log2Up(length)+1)).setWeakName("data_mid")
     data_mid(0) := data_reorder
     for {
@@ -67,7 +67,7 @@ case class FFT1D(cfg: FFTConfig, serial: Boolean = false) extends Component {
     io.data_out.payload := data_mid(log2Up(length))
   }
 
-  else {
+  else new AreaRoot {
 //    val current_level = CountUpFrom(
 //      RegNext(io.data_in.valid, init = False), log2Up(length)+1, "current_level"
 //    ).counter
@@ -102,7 +102,7 @@ case class FFT1D(cfg: FFTConfig, serial: Boolean = false) extends Component {
 }
 
 object FFT1D {
-  def fft(input: Flow[Vec[HComplex]], use_pipeline: Boolean = true): Flow[Vec[HComplex]] = {
+  def fft(input: Flow[Vec[HComplex]], use_pipeline: Boolean = true): Flow[Vec[HComplex]] = new Composite(input){
     // support for any points FFT
     val cfg = input.payload(0).config
     val length = input.payload.length
@@ -119,31 +119,26 @@ object FFT1D {
     }
     val fft_core = FFT1D(fftConfig)
     fft_core.io.data_in <> input
-    fft_core.io.data_out
-  }
+  }.fft_core.io.data_out
 
-  def fft(input: Flow[HComplex], length: Int, use_pipeline: Boolean): Flow[Vec[HComplex]] = {
+  def fft(input: Flow[HComplex], length: Int, use_pipeline: Boolean): Flow[Vec[HComplex]] = new Composite(input){
     val sdata_in = Vec( History(input.payload, length, input.valid).reverse ).setWeakName("sdata_in")
     val fft_input_flow = Flow(cloneOf(sdata_in)).setWeakName("fft_input_flow")
     fft_input_flow.payload := sdata_in
     fft_input_flow.valid := input.valid.aftermath(length).counter.willOverflow
-    fft(fft_input_flow, use_pipeline).setWeakName("sdata_out")
-  }
+    val ret = fft(fft_input_flow, use_pipeline).setWeakName("sdata_out")
+  }.ret
 
-  def sfft(input: Flow[HComplex], length: Int): Flow[HComplex] = {
+  def sfft(input: Flow[HComplex], length: Int): Flow[HComplex] = new Composite(input){
     val sdata_in = Vec( History(input.payload, length, input.valid).reverse ).setWeakName("sdata_in")
     val fft_input_flow = Flow(cloneOf(sdata_in)).setWeakName("fft_input_flow")
     fft_input_flow.payload := sdata_in
-//    fft_input_flow.valid := countUpInside(input.valid, length).last
     fft_input_flow.valid := input.valid.lasting(length).last
     val sdata_out = fft(fft_input_flow, use_pipeline = false).setName("sdata_out")
-//    val sdata_out_regs_addr_area = CountUpFrom(RegNext( sdata_out.valid , init = False), length, prefix = "sdata_out_regs_addr_area")
     val sdata_out_regs_addr_area = RegNext(sdata_out.valid, False).aftermath(length)
     val sdata_out_regs = sdata_out.toReg().setName("sdata_out_regs")
     val output = Flow(HComplex(sdata_out.payload(0).config)).setName("output")
     output.payload := sdata_out_regs(sdata_out_regs_addr_area.counter.value)
     output.valid := sdata_out_regs_addr_area.condPeriod
-    output
-  }
-  //def fft_latency(length: Int): Int = log2Up(length) + 2
+  }.output
 }

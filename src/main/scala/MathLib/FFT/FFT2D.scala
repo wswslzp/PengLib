@@ -12,18 +12,16 @@ case class FFT2D(cfg: FFTConfig) extends Module {
 
   case class ColAddrArea(use_pip: Boolean) extends Component {
     val row_addr_ov = in Bool()
-    val fft_out_vld = in Bool() //allowPruning()
+    val fft_out_vld = in Bool()
     val col_addr = out UInt(log2Up(cfg.point) bit)
     val col_addr_vld = out Bool()
 
-    if(use_pip){
-//      val col_addr_area = countUpFrom(row_addr_ov, 0 until cfg.point, "col_addr")
+    if(use_pip) new AreaRoot {
       val col_addr_area = row_addr_ov.aftermath(cfg.point)
       col_addr := col_addr_area.counter.value
       col_addr_vld := col_addr_area.condPeriod
-    } else {
+    } else new AreaRoot{
       val cnt = Counter(0 until cfg.point, inc = row_addr_ov || fft_out_vld)
-      cnt.setCompositeName(this, "col_addr_cnt")
       val cond_period_minus_1 = Reg(Bool()) setWhen row_addr_ov clearWhen cnt.willOverflow
       col_addr_vld := cond_period_minus_1 | row_addr_ov
       col_addr := cnt.value

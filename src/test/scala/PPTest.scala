@@ -80,6 +80,17 @@ object PPTest {
     }.asBits.asUInt
   }
 
+  abstract class AP1 extends Module {
+    val data = in Bits(9 bit)
+    val io = new Bundle {
+    }
+  }
+  class P9 extends AP1 {
+    override val io = new Bundle {
+      val x = out Bits(8 bit)
+    }
+  }
+
   def main(args: Array[String]): Unit = {
 //    SimConfig
 //      .withWave
