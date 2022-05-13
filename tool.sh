@@ -42,14 +42,6 @@ install_cocotb(){
   sudo apt install -y git make gcc g++ swig python3-dev
 }
 
-purge_cocotb(){
-  # Force cocotb to compile VPI to avoid race condition when tests are start in parallel
-  cd tester/src/test/python/spinal/Dummy
-  make TOPLEVEL_LANG=verilog
-  make TOPLEVEL_LANG=vhdl
-  cd ../../../../../..
-}
-
 install_packages(){
   sudo apt update -y -qq
   sudo apt install -y gnat-9  libgnat-9 zlib1g-dev libboost-dev
