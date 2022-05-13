@@ -65,7 +65,7 @@ jobs:
 
       - name: Install cached tools
         if: steps.tools.outputs.cache-hit != 'true'
-        run: source tools.sh && install_packages && (cd ~/ && install_tools) && purge_cocotb
+        run: source tool.sh && install_packages && (cd ~/ && install_tools) && purge_cocotb
 
       ##############################################
 
@@ -79,12 +79,12 @@ jobs:
 
       - name: Install fpga_toolchain
         if: steps.fpga_toolchain.outputs.cache-hit != 'true'
-        run: source tools.sh && (cd ~/ && install_fpga_toolchain)
+        run: source tool.sh && (cd ~/ && install_fpga_toolchain)
 
       ##############################################
 
       - name: Install uncached tools
-        run: source tools.sh && install_packages && (cd ~/ && install_cocotb) && purge_cocotb
+        run: source tool.sh && install_packages && (cd ~/ && install_cocotb) && purge_cocotb
 
       ##############################################
 
