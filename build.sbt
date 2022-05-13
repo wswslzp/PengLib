@@ -3,7 +3,7 @@ name := "PengLib"
 version := "1.0"
 scalaVersion := "2.12.13"
 //scalaVersion := "2.13.6"
-val spinalVersion = "1.6.4"
+val spinalVersion = "1.7.0"
 
 publishTo := Some("Sonatype Snapshots Nexus" at "https://oss.sonatype.org/content/repositories/snapshots")
 
