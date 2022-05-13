@@ -78,6 +78,10 @@ object PPTest {
       val total = data.getWidth / 8
       total - 1 -i
     }.asBits.asUInt
+    data.addTag(new CommentTag("there is a data."))
+    data.addAttribute(new AttributeFlag("therer i a data", COMMENT_ATTRIBUTE))
+    addComment(f"P8 comment hrere")
+
   }
 
   abstract class AP1 extends Module {
@@ -112,7 +116,8 @@ object PPTest {
 //        simSuccess()
 //      }
 
-    PrintRTL("rtl")(P8())
+//    PrintRTL("rtl")(P8())
+    SpinalVerilog(P8())
   }
 
 }

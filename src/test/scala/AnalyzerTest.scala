@@ -6,42 +6,25 @@ import spinal.lib._
 import scala.language._
 
 object AnalyzerTest {
-  import MathLib.FFT._
-  import internals._
-  import EdaAuto._
-  import scala.collection.mutable.ArrayBuffer
 
-  class Phase1 extends PhaseMisc {
-    override def impl(pc: PhaseContext): Unit = {
-      import pc._
-      import ModuleAnalyzer._
-      import DataAnalyzer._
-
-//      topLevel.allInputs.foreach(bt=> SpinalInfo(s"get input : $bt"))
-//      topLevel.allOutputs.foreach(bt=> SpinalInfo(s"get output : $bt"))
-//      topLevel.allClocks.foreach(cd=> SpinalInfo(s"get clock : $cd"))
-//      topLevel.allRegisters.foreach(reg=> SpinalInfo(s"get register : $reg"))
-//      topLevel.getRegisters({reg=>
-//        reg.getName().contains("col")
-//      }).foreach(reg=> SpinalInfo(s"get col register : $reg"))
-
-//      def cellNotFixTo(module: Module): Boolean = !module.getDisplayName().contains("fixTo")
-//      topLevel.getCells(cellNotFixTo).foreach(cell=> SpinalInfo(s"get sub module : $cell"))
-      val top = topLevel.asInstanceOf[FFT2D]
-      top.io.line_in.valid.allFanOut.foreach(bt=> SpinalInfo(s"get valid outputs : $bt"))
-      top.io.line_out.valid.allFanIn.foreach(bt=> SpinalInfo(s"get valid inputs : $bt"))
-    }
-  }
-
-  def insertPhase(phases: ArrayBuffer[Phase]): Unit = {
-    phases.append(new Phase1)
+  def hacker_popcnt(num: Int): Int = {
+    val n1 = num - ((num >> 1) & 0x55555555)
+    val n2 = (n1 & 0x33333333) + ((n1 >> 2) & 0x33333333)
+    val n3 = ((n2 >> 4) + n2) & 0x0f0f0f0f
+    val n4 = n3 + (n3 >> 8)
+    val n5 = n4 + (n4 >> 16)
+    n5 & 0x0000003f
   }
 
   def main(args: Array[String]): Unit = {
-    val cfg = FFTConfig(HComplexConfig(8, 8), 128, 128)
-    SpinalConfig(
-      phasesInserters = ArrayBuffer(insertPhase)
-    ).generateVerilog(FFT2D(cfg))
-  }
+    val test_nums = List(
+      "0000111100001111".asBin.toInt,
+      "0000111100001110".asBin.toInt,
+      "0000110000001111".asBin.toInt,
+      "0000011000001110".asBin.toInt
+    )
 
+    val results = test_nums.map(hacker_popcnt)
+    results.indices.foreach{id=> println(s"${test_nums(id)} has ${results(id)} '1'")}
+  }
 }
