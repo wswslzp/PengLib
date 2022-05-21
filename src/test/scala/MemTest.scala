@@ -76,10 +76,18 @@ object MemTest {
   case class MemToy4() extends Module {
     val mem = Mem(Bits(32 bit), 512)
 //    mem(in UInt(9 bit)) := in Bits(32 bit)
+    val a = Reg(Bits(32 bit))
     mem.write(in UInt(9 bit), in Bits(32 bit), mask = in Bits(32 bit))
 //    mem.addTag(dontBB)
 //    out(mem(in UInt(9 bit)))
-    out(mem.readSync(in UInt(9 bit)))
+//    out(mem.readSync(in UInt(9 bit)))
+    a := mem.readSync(in UInt(9 bit))
+    out(a)
+    rework {
+      import EdaAuto.ModuleAnalyzer
+      val ana = new ModuleAnalyzer(this)
+      ana.allRegisters.foreach(bt=> bt.init(bt.getZero))
+    }
   }
 
   def main(args: Array[String]): Unit = {
