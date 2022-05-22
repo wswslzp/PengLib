@@ -1,18 +1,18 @@
 package NoC.Mesh
 
 import scala.language._
-import NoC._
+import NoC.{Mesh, _}
 import spinal.core._
 
-case class MeshNet[T <: Data](config: MeshConfig[T] ) extends Module with RenameFlitPayload {
+case class MeshNet[T <: Data](config: MeshConfig[T]) extends Module with RenameFlitPayload {
   import config._
-  import MeshRouter._
+  import MeshType._
 
   val io = new Bundle {
     val reqArray = Array.fill(xNum, yNum, 4)(RequestChannel(routerConfig))
   }
   val routerArray = Array.tabulate(xNum, yNum){ (i, j)=>
-    val ret = MeshRouter(i, j, routerConfig)
+    val ret = Mesh.BufferLessRouter(i, j, routerConfig)
     ret.io.reqIO.zip(io.reqArray(i)(j)).foreach {case (nodeReq, meshReq)=>
       nodeReq <> meshReq
     }

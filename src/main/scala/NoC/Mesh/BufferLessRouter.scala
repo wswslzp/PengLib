@@ -1,48 +1,15 @@
 package NoC.Mesh
 
-import scala.language.postfixOps
+import NoC._
 import spinal.core._
 import spinal.lib._
-import NoC._
 
-case class MeshRouter[T <: Data](xPos: Int, yPos: Int, config: RouterConfig[T]) extends Router(config) {
-  import MeshRouter._
-  //
-  def localPosX = U(xPos, 8 bit)
-  def localPosY = U(yPos, 8 bit)
-  private def toLocal(attribute: FlitAttribute): Bool = attribute.targetID.x === localPosX && attribute.targetID.y === localPosY
+import scala.language.postfixOps
 
-  def crossRouteX(index: Int)(attr: FlitAttribute): Bool = {
-    val ret = Bool()
-    when(attr.targetID.x === localPosX) {
-      ret.set()
-    } elsewhen (attr.targetID.x > localPosX) {
-      ret := Bool(index == SOUTH) //3
-    } otherwise {
-      ret := Bool(index == NORTH) //2
-    }
-    ret
-  }
-  def crossRouteY(index: Int)(attr: FlitAttribute): Bool = {
-    val ret = Bool()
-    when(attr.targetID.x =/= localPosX) {
-      ret.set()
-    } elsewhen (attr.targetID.y > localPosY) {
-      ret := Bool(index == EAST) // 0
-    } otherwise {
-      ret := Bool(index == WEST) // 1
-    }
-    ret
-  }
-
-  def shortConnectOn(port: Int): Unit = {
-    io.meshIO(port).input << io.meshIO(port).output
-  }
-  def assignNext(that: MeshRouter[T], from: Int, to: Int): Unit = {
-    that.io.meshIO(to).input << io.meshIO(from).output
-    that.io.meshIO(to).output >> io.meshIO(from).input
-  }
-  def assignNext(that: MeshRouter[T])(fromTo: (Int, Int)): Unit = assignNext(that, fromTo._1, fromTo._2)
+case class BufferLessRouter[T <: Data](xPos: Int, yPos: Int, config: RouterConfig[T]) extends RouterBase(config) with MeshType[T] {
+  import MeshType._
+  override def localX = U(xPos, 8 bit)
+  override def localY = U(yPos, 8 bit)
 
   //  logic elements
   case class Crosser(xTurn: FlitAttribute=> Bool, yTurn: FlitAttribute=> Bool) extends Area {
@@ -105,12 +72,4 @@ case class MeshRouter[T <: Data](xPos: Int, yPos: Int, config: RouterConfig[T]) 
     io.meshIO(NORTH).output <-< cross(WEST).yout
     io.meshIO(SOUTH).output <-< cross(EAST).yout
   }
-}
-
-object MeshRouter {
-  def EAST = 0
-  def WEST = 1
-  def NORTH = 2
-  def SOUTH = 3
-
 }
