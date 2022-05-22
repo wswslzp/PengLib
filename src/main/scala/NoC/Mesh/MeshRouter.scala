@@ -10,16 +10,16 @@ case class MeshRouter[T <: Data](xPos: Int, yPos: Int, config: RouterConfig[T]) 
   //
   def localPosX = U(xPos, 8 bit)
   def localPosY = U(yPos, 8 bit)
-  private def toLocal(attribute: FlitAttribute): Bool = attribute.targetID.x === localPosX || attribute.targetID.y === localPosY
+  private def toLocal(attribute: FlitAttribute): Bool = attribute.targetID.x === localPosX && attribute.targetID.y === localPosY
 
   def crossRouteX(index: Int)(attr: FlitAttribute): Bool = {
     val ret = Bool()
     when(attr.targetID.x === localPosX) {
       ret.set()
     } elsewhen (attr.targetID.x > localPosX) {
-      ret := Bool(index == SOUTH)
+      ret := Bool(index == SOUTH) //3
     } otherwise {
-      ret := Bool(index == NORTH)
+      ret := Bool(index == NORTH) //2
     }
     ret
   }
@@ -28,9 +28,9 @@ case class MeshRouter[T <: Data](xPos: Int, yPos: Int, config: RouterConfig[T]) 
     when(attr.targetID.x =/= localPosX) {
       ret.set()
     } elsewhen (attr.targetID.y > localPosY) {
-      ret := Bool(index == EAST)
+      ret := Bool(index == EAST) // 0
     } otherwise {
-      ret := Bool(index == WEST)
+      ret := Bool(index == WEST) // 1
     }
     ret
   }
@@ -91,8 +91,8 @@ case class MeshRouter[T <: Data](xPos: Int, yPos: Int, config: RouterConfig[T]) 
     val cross = Array.tabulate(config.portNum)(i=> Crosser(crossRouteX(i), crossRouteY(i)))
 
     cross(EAST).xin  << rx(EAST).output
-    cross(WEST).xin << rx(WEST).output
-    cross(NORTH).yin  << rx(NORTH).output
+    cross(WEST).xin  << rx(WEST).output
+    cross(NORTH).yin << rx(NORTH).output
     cross(SOUTH).yin << rx(SOUTH).output
 
     cross(EAST).yin  <-< cross(NORTH).yout
@@ -112,5 +112,5 @@ object MeshRouter {
   def WEST = 1
   def NORTH = 2
   def SOUTH = 3
-  
+
 }

@@ -13,4 +13,9 @@ libraryDependencies ++= Seq(
   compilerPlugin("com.github.spinalhdl" %% "spinalhdl-idsl-plugin" % spinalVersion)
 )
 
+libraryDependencies += "org.scalatest" %% "scalatest" % "3.2.5"
+libraryDependencies += "ch.qos.logback" % "logback-classic" % "1.2.10"
+libraryDependencies += "com.typesafe.scala-logging" %% "scala-logging" % "3.9.4"
+
+
 fork := true

@@ -6,7 +6,7 @@ package object NoC {
     noIoPrefix()
     afterElaboration {
       getAllIo.foreach(bt=> {
-        if(bt.getName().contains("_payload_")) bt.setName(bt.getName().replace("_payload_", ""))
+        if(bt.getName().contains("_payload_")) bt.setName(bt.getName().replace("_payload", ""))
       })
     }
   }

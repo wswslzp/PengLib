@@ -35,12 +35,13 @@ case class MeshNet[T <: Data](config: MeshConfig[T] ) extends Module with Rename
 }
 
 object MeshNet {
+  val fconfig = FlitConfig()
+  val rconfig = RouterConfig(flitConfig = fconfig, dataType = UInt(32 bit), portNum = 4)
+  val dim = 4
+  val config = MeshConfig(routerConfig = rconfig, xNum = dim, yNum = dim)
+
   def main(args: Array[String]): Unit = {
     import Util._
-    val fconfig = FlitConfig()
-    val rconfig = RouterConfig(flitConfig = fconfig, dataType = UInt(32 bit), portNum = 4)
-    val dim = 2
-    val config = MeshConfig(routerConfig = rconfig, xNum = dim, yNum = dim)
     PrintRTL("rtl")(MeshNet(config))
   }
 }
