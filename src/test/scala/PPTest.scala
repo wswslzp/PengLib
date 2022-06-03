@@ -49,12 +49,13 @@ object PPTest {
   case class P5() extends Module {
     val a = in UInt(8 bit)
     val b = out UInt(8 bit)
-    val en = in Bool()
+//    val en = in Bool()
 
-    val a1 = Delay(a, 1, init = a.getZero)
-    val d4 = new ClockEnableArea(en){
-      b := Delay(a1, 2, init = a1.getZero)
-    }
+    val a1 = Delay(a, 0, init = a.getZero)
+    b := a1
+//    val d4 = new ClockEnableArea(en){
+//      b := Delay(a1, 1, init = a1.getZero)
+//    }
   }
 
   case class P6() extends Module {
@@ -95,6 +96,74 @@ object PPTest {
     }
   }
 
+  object DelayWithInit1 {
+    def apply[T <: Data](that: T, cycleCount: Int, when: Bool = null)(onEachReg: T => Unit = null): T = {
+//      Delay[T](that, cycleCount, onEachReg = onEachReg)
+      require(cycleCount >= 0,"Negative cycleCount is not allowed in Delay")
+      var ptr = that
+      for(i <- 0 until cycleCount) {
+        if (when == null)
+//          ptr = RegNext(ptr, init)
+          ptr = RegNext(ptr)
+        else
+//          ptr = RegNextWhen(ptr, when, init)
+          ptr = RegNextWhen(ptr, when)
+
+        ptr.unsetName().setCompositeName(that, "delay_" + (i + 1), true)
+        if(onEachReg != null) {
+          onEachReg(ptr)
+        }
+      }
+      ptr
+    }
+  }
+
+  object Delay1 {
+    def apply[T <: Data](that: T, cycleCount: Int, when : Bool = null, init: T = null, onEachReg : T => Unit = null): T = {
+//    def apply[T <: Data](that: T, cycleCount: Int, when : Bool = null, onEachReg : T => Unit = null, init: T = null): T = {
+      DelayWithInit1(that, cycleCount, when){dt=>
+        onEachReg(dt)
+        if (init != null) dt.init(init)
+      }
+    }
+  }
+
+  object Delay2 {
+//    def apply[T <: Data](that: T, cycleCount: Int,when : Bool = null,init : T = null.asInstanceOf[T],onEachReg : T => Unit = null.asInstanceOf[T => Unit]): T = {
+    def apply[T <: Data](that: T, cycleCount: Int, when : Bool = null, init: T = null, onEachReg : T => Unit = null): T = {
+      require(cycleCount >= 0,"Negative cycleCount is not allowed in Delay")
+      var ptr = that
+      for(i <- 0 until cycleCount) {
+        if (when == null)
+          ptr = RegNext(ptr, init)
+        else
+          ptr = RegNextWhen(ptr, when, init)
+
+        ptr.unsetName().setCompositeName(that, "delay_" + (i + 1), true)
+        if(onEachReg != null) {
+          onEachReg(ptr)
+        }
+      }
+      ptr
+    }
+  }
+
+  case class P10() extends Module {
+    val a = in Bool()
+    val clear = in Bool()
+    val b = out Bool()
+//    b := DelayWithInit(a, 4){d=>
+//      println(d.getBitsWidth)
+//    }
+    val c = Delay2(
+      a, 4,
+      onEachReg = (d: Bool)=> {
+        println(d.getBitsWidth)
+      }
+    )
+    b := c
+  }
+
   def main(args: Array[String]): Unit = {
 //    SimConfig
 //      .withWave
@@ -116,8 +185,8 @@ object PPTest {
 //        simSuccess()
 //      }
 
-//    PrintRTL("rtl")(P8())
-    SpinalVerilog(P8())
+    PrintRTL("rtl1")(P10())
+//    SpinalVerilog(P5())
   }
 
 }

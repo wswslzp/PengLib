@@ -5,6 +5,10 @@ import NoC._
 import scala.language._
 import spinal.core._
 
+/**
+ * Router with mesh topology routing algorithm
+ * @tparam T data type
+ */
 trait MeshType[T <: Data] { this: RouterBase[T] =>
   import MeshType._
   def localX: UInt
