@@ -9,7 +9,7 @@ Collecting some infrastructure library in SpinalHDL. The feature of this library
 
 ## Usage
 
-1. create your own SpinalHDL.
+1. create your own SpinalHDL project.
 
 ```shell
 > sbt new wswslzp/spinal.g8
