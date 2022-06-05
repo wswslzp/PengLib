@@ -75,7 +75,7 @@ There are also four types of memory wrapper for each SRAM type, corresponding to
 The memory wrapper contains a memory blackbox representing the true SRAM (ROM) instance named `ram`.
 It's a SRAM instance of a specific memory vendor like `Huali`, which has Huali-specific memory ports. 
 You usually create such memory instance using memory compiler (like Synopsys memory compiler `integrator` tool). 
-The port definitions are contained in the generated Verilog/VHDL model. So in SpinalHDL, this 
+The port definitions are contained in the generated Verilog/VHDL model. So in SpinalHDL, this instance is a SpinalHDL `BlackBox`.
 
 This inner blackbox `ram` is created by `build` method of the `MemVendor`. 
 
