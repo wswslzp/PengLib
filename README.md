@@ -36,6 +36,7 @@ val spinal = Seq(
   compilerPlugin("com.github.spinalhdl" %% "spinalhdl-idsl-plugin" % spinalVersion)
 )
 
+// point to the PengLib directory
 lazy val penglib = ProjectRef(file("../PengLib"), "penglib")
 
 lazy val root = (project in file(".")).
@@ -44,7 +45,7 @@ lazy val root = (project in file(".")).
     libraryDependencies ++= spinal,
     fork := true,
     javaOptions := Seq("-Xmx16G")
-  ).dependsOn(penglib)
+  ).dependsOn(penglib) // remember adding dependency on penglib
 ```
 
 Then your project now is depending on `PengLib`. Also you can download this repo and publish local `jar` files then use the jar library in your project as well.
