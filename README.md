@@ -95,8 +95,8 @@ You don't have to change any line of your original RTL source code
 The `PhaseSramConverter` takes a parameter that specifies the SRAM vendor. It depends on which 
 memory compiler you are using. Here as an example the `Huali` memory compiler is used. 
 
-Users have to provide the necessary information of a vendor:
-* How an SRAM of the vendor connects to the memory wrapper.
+Users have to provide the necessary information of a memory vendor:
+* How an SRAM of this vendor connects to the memory wrapper.
 * Which memory topology is allowed, single port / dual port / two port ...
 * The naming convention of an SRAM.
 
@@ -115,19 +115,26 @@ The default memory blackboxer policy used in `MemVendor` is `blackboxAll`, imple
 To provide a unified memory interface, this memory converter creates memory wrappers for all the `Mem` instance. 
 You can also use the `MemWrapper` feature directly, without inserting memory blackboxing phases.
 
-A memory wrapper (class of `MemWrapper`) is a hardware module that connects the unified memory interface to the specific SRAM instance's ports,
-which are various for different memory vendor. 
-It contains a memory blackbox representing the true SRAM instance named `ram`.
+A memory wrapper (class `MemWrapper`) is a hardware module that connects the unified memory interface to the specific SRAM instance's ports,
+which are vendor-specific. The memory wrapper modules are designed in [MemWrapper](src/main/scala/MemBlackBoxer/MemManager/MemWrapper.scala).
+
+There are also four types of memory wrapper for each SRAM type, corresponding to four types of memory: 
+1. single port SRAM
+2. dual port SRAM
+3. two port SRAM
+4. ROM.
+
+The memory wrapper contains a memory blackbox representing the true SRAM (ROM) instance named `ram`.
+It's a SRAM instance of a specific memory vendor like `Huali`, which has Huali-specific memory ports. 
+You usually create such memory instance using memory compiler (like Synopsys memory compiler `integrator` tool). 
+The port definitions are contained in the generated Verilog/VHDL model. So in SpinalHDL, this 
 
 This inner blackbox `ram` is created by `build` method of the `MemVendor`. 
-It's a SRAM instance of a specific memory vendor like `Huali`.
+
 And it will be built by passing `this` memory wrapper as parameter.
 
 This `build` flow will not only create memory instance, but also handle the connection between SRAM ports and the unifed interface
 (this is why it needs the reference to the wrapper).
-
-Because there are usually four types of memory: single port SRAM, dual port SRAM, two port SRAM and ROM,
-there are also four types of memory wrapper for each SRAM type.
 
 As in [Huali.build()](src/main/scala/MemBlackBoxer/Vendor/Huali.scala),
 
