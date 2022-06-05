@@ -12,7 +12,7 @@ Collecting some infrastructure library in SpinalHDL. The feature of this library
 1. create your own SpinalHDL project.
 
 ```shell
-> sbt new wswslzp/spinal.g8
+sbt new wswslzp/spinal.g8
 ```
 
 2. clone this project in the same directory as your project resides.
