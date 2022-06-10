@@ -8,11 +8,19 @@ case class NodeID(config: FlitConfig) extends Bundle {
   val x,y = UInt(config.dirWidth bit)
 }
 
+object PacketType extends SpinalEnum {
+  val AR, R, AW, W, B = newElement()
+}
+
 case class FlitAttribute(config: FlitConfig) extends Bundle {
-  val qos = Bits(config.qosWidth bit)
-  val mode = Bits(config.modeWidth bit)
+  val packetID = Bits(config.packetIdWidth bit)
+  val packetType = PacketType()
+  val packetLen = UInt(config.packetLenWidth bit)
+  val flitID = Bits(config.flitIdWidth bit)
   val sourceID, targetID = NodeID(config)
-  val txnID = Bits(config.txnIdWidth bit)
+  val txnID = ifGen(config.useTxn)(Bits(config.txnIdWidth bit))
+  val qos = ifGen(config.useQos)(Bits(config.qosWidth bit))
+  val mode = ifGen(config.useMode)(Bits(config.modeWidth bit))
 }
 
 case class Flit[T <: Data](config: FlitConfig, dataType: HardType[T]) extends Bundle {
