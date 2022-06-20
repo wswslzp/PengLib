@@ -62,8 +62,7 @@ class PrefixComputer[T <: Data](dt: HardType[T], binaryOperator: (T, T) => T) ex
     val totalStage = log2Up(operatorStage)
     val midStages = List.tabulate(totalStage)(MidStage)
     val endStage = EndStage(totalStage)
-    midStages.map(_.dataIn).zip(io.dataIn +: midStages.dropRight(1).map(_.dataOut)).foreach({ case (t, t1) => t := t1})
-    endStage.dataIn := midStages.last.dataOut
+    (midStages.map(_.dataIn) :+ endStage.dataIn) zip (io.dataIn +: midStages.map(_.dataOut)) foreach { case (t, t1) => t := t1 }
     io.dataOut := endStage.dataOut
   }
 }
@@ -87,7 +86,7 @@ object PrefixComputer {
     val ret = prefixComputer.io.dataOut
   }.ret
   def prefixFlow[T<:Data](input: Flow[T], clear: Bool = False)(op: (T, T)=> T) = new Composite(input) {
-    val prefixComputer = new PrefixComputer(input,op)
+    val prefixComputer = new PrefixComputer(input.payload,op)
     prefixComputer.io.dataIn := input.payload
     prefixComputer.io.clear := clear
     val retPayload = prefixComputer.io.dataOut

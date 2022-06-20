@@ -5,6 +5,9 @@ import spinal.lib._
 import scala.language._
 
 import Util._
+
+import com.usb.phy._
+
 object PPTest {
 
   case class PP() extends Module {
@@ -51,17 +54,11 @@ object PPTest {
     val b = out UInt(8 bit)
 //    val en = in Bool()
 
-    val a1 = Delay(a, 0, init = a.getZero)
+    val a1 = Delay(a, 4, init = a.getZero)
     b := a1
 //    val d4 = new ClockEnableArea(en){
 //      b := Delay(a1, 1, init = a1.getZero)
 //    }
-  }
-
-  case class P6() extends Module {
-    val a, b, c = in UInt(8 bit)
-    val d, e = out UInt(12 bit)
-    (d, e) := (a, b, c).asBits
   }
 
   case class P7() extends Module {
@@ -164,6 +161,13 @@ object PPTest {
     b := c
   }
 
+
+  case class P11() extends Module {
+    val input = UInt(32 bit)
+//    val input1 = input.roundToOdd(16, true)
+    //    input.roundToOdd(16, true)
+  }
+
   def main(args: Array[String]): Unit = {
 //    SimConfig
 //      .withWave
@@ -185,7 +189,7 @@ object PPTest {
 //        simSuccess()
 //      }
 
-    PrintRTL("rtl1")(P10())
+    PrintRTL("rtl1")(P5())
 //    SpinalVerilog(P5())
   }
 

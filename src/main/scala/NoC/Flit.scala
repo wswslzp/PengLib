@@ -7,6 +7,14 @@ import spinal.lib._
 case class NodeID(config: FlitConfig) extends Bundle {
   val x,y = UInt(config.dirWidth bit)
 }
+object NodeID {
+  def apply(x: Int, y: Int, config: FlitConfig): NodeID = {
+    val ret = NodeID(config)
+    ret.x := x
+    ret.y := y
+    ret
+  }
+}
 
 object PacketType extends SpinalEnum {
   val AR, R, AW, W, B = newElement()
