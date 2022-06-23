@@ -8,7 +8,7 @@ object StubTest {
 
   case class MA() extends Module{
     val a,b = in UInt(8 bit)
-    out(a * b)
+    out(a * b).setAsReg()
 //    val c = out(UInt(16 bit))
 //    c := a * b
     //    val a, b = in(Vec.fill(2)(UInt(8 bit)))
@@ -20,8 +20,15 @@ object StubTest {
 
   def main(args: Array[String]): Unit = {
     import Util._
-//    PrintRTL("rtl")(MA().stub)
-    PrintRTL("rtl")(MA())
+//    PrintRTL("rtl")(MA()).printRtl()
+
+    SimConfig.compile(MA()).doSim({dut=>
+      dut.clockDomain.forkStimulus(2)
+      for(i <- 0 until 100){
+        dut.clockDomain.waitSampling()
+        println(simTime())
+      }
+    })
   }
 
 }
