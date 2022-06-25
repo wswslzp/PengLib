@@ -24,7 +24,7 @@ case class FlitAttribute(config: FlitConfig) extends Bundle {
   val packetID = Bits(config.packetIdWidth bit)
   val packetType = PacketType()
   val packetLen = UInt(config.packetLenWidth bit)
-  val flitID = Bits(config.flitIdWidth bit)
+  val flitID = UInt(config.flitIdWidth bit)
   val sourceID, targetID = NodeID(config)
   val txnID = ifGen(config.useTxn)(Bits(config.txnIdWidth bit))
   val qos = ifGen(config.useQos)(Bits(config.qosWidth bit))
