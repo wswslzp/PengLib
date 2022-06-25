@@ -20,7 +20,7 @@ class SplitterTest extends AnyFunSuite {
   val ow = Random.nextInt(iw)
 
 //  val m = SimConfig.withIVerilog.withWave.compile(Splitter(maxLen, iw, ow))
-  val m = SimConfig.withIVerilog.withWave.compile(Splitter1(maxLen, iw, ow))
+  val m = SimConfig.withIVerilog.withWave.compile(Splitter(maxLen, iw, ow))
 
   case class MPacket(iw: Int, ow: Int, burstLen: Int = 1){
     private val alignedSlice = Math.ceil(iw.toDouble * burstLen / ow).toInt

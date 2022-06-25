@@ -7,13 +7,14 @@ import spinal.lib._
 import fsm._
 import Util._
 
-case class Splitter1(maxLength: Int, inputWidth: Int, outputWidth: Int) extends Module {
+case class Splitter(maxLength: Int, inputWidth: Int, outputWidth: Int) extends Module {
   private val idWidth = log2Up(maxLength)
   val io = new Bundle {
     val input = slave(Stream(Bits(inputWidth bit)))
     val burstLen = slave(Stream(UInt(idWidth bit)))
     val output = master(Stream(Bits(outputWidth bit)))
-    val outputID = out UInt (log2Up(maxLength) bit)
+    val outputID = out UInt(idWidth bit)
+    val packetLen = out UInt(idWidth bit)
   }
 
   // input buffer
@@ -28,6 +29,7 @@ case class Splitter1(maxLength: Int, inputWidth: Int, outputWidth: Int) extends 
   val length1 = totalIW / outputWidth
   val length2 = (totalIW % outputWidth =/= 0).asUInt.resized
   val length = length1 + length2
+  io.packetLen := length.resized
 
   // width adapter
   val paddedInputWidth = inputWidth + outputWidth
@@ -111,9 +113,9 @@ case class Splitter1(maxLength: Int, inputWidth: Int, outputWidth: Int) extends 
 
 }
 
-object Splitter1 {
+object Splitter {
   def main(args: Array[String]): Unit = {
     import Util._
-    PrintRTL("rtl1")(Splitter1(32, 12, 8)).printRtl()
+    PrintRTL("rtl1")(Splitter(32, 12, 8)).printRtl()
   }
 }
