@@ -222,6 +222,10 @@ case class HComplex(config: HComplexConfig) extends Bundle with Num[HComplex] {
   override def round(n: Int, align: Boolean) = ???
 
   override type RefOwnerType = this.type
+
+  override def roundToEven(n: Int, align: Boolean): HComplex = ???
+
+  override def roundToOdd(n: Int, align: Boolean): HComplex = ???
 }
 
 object HComplex {

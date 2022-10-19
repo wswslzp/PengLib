@@ -1,9 +1,8 @@
-package EdaAuto
+package spinal.lib.tools
 
 import spinal.core._
-import spinal.lib._
-import scala.language.{postfixOps, implicitConversions}
-import spinal.core.internals._
+
+import scala.language._
 
 /**
  * Module topology analyzer. It provides some methods that return the input or output pins,

@@ -84,7 +84,7 @@ object MemTest {
     a := mem.readSync(in UInt(9 bit))
     out(a)
     rework {
-      import EdaAuto.ModuleAnalyzer
+      import spinal.lib.tools.ModuleAnalyzer
       val ana = new ModuleAnalyzer(this)
       ana.allRegisters.foreach(bt=> bt.init(bt.getZero))
     }
