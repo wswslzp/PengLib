@@ -9,12 +9,12 @@ class MemPorts extends Bundle
 
 case class AddrCtrlPorts(mc: MemConfig) extends MemPorts with IMasterSlave {
   val memoryEnable = Bool()
-  val mask = mc.genMask
+  val mask = if (mc.maskBitWidth != 0) mc.genMask else null
   val address = UInt(mc.addrWidth bit)
 
   override def asMaster(): Unit = {
     in(memoryEnable, mask, address)
-    in(memoryEnable, address)
+//    in(memoryEnable, address)
   }
 }
 
