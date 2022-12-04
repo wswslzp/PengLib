@@ -51,16 +51,21 @@ class PhaseSramConverter(globalMemVendor: MemVendor = Vendor.Huali, policy: MemB
         ret
     }
 
-    val memConfig = MemConfig(
-      dataWidth = mem.width,
-      depth = mem.wordCount,
-      vendor = getVendor
-    )
+    def MakeMemConfig(memMaskWidth: Int) : MemConfig = {
+      MemConfig(
+        dataWidth = mem.width,
+        depth = mem.wordCount,
+        vendor = getVendor,
+        maskBitWidth = memMaskWidth
+      )
+    }
 
     getMemType(memTopology) match {
       case ROM => "Can't create ROM with initial content"
       case SinglePort =>
         mem.component.rework {
+          val memMaskWidth = if (memTopology.readWriteSync.head.mask != null) memTopology.readWriteSync.head.mask.getWidth else 0
+          val memConfig = MakeMemConfig(memMaskWidth)
           val port = memTopology.readWriteSync.head
           val ram = Ram1rw(memConfig)
 
@@ -70,8 +75,6 @@ class PhaseSramConverter(globalMemVendor: MemVendor = Vendor.Huali, policy: MemB
           ram.io.dp.writeData.assignFrom(port.data)
           if (port.mask != null) {
             ram.io.ap.mask.assignFrom(port.mask)
-          } else {
-            ram.io.ap.mask.setAllTo(true)
           }
           wrapConsumers(memTopology, port, ram.io.dp.readData)
 
@@ -80,6 +83,30 @@ class PhaseSramConverter(globalMemVendor: MemVendor = Vendor.Huali, policy: MemB
         null
       case DualPort =>
         mem.component.rework{
+          // duap port may consist that one port want mask control while the other one dont use mask. However, the sram of memory compiler will generate mask for Port A and Port B if one of them need mask.
+          // Therefore, it should consider different situations.
+
+          val hasMask = (memTopology.readWriteSync(0).mask != null) || (memTopology.readWriteSync(1).mask != null)
+          val maskAOnly = (memTopology.readWriteSync(0).mask != null) && (memTopology.readWriteSync(1).mask == null)
+          val maskBOnly = (memTopology.readWriteSync(0).mask == null) && (memTopology.readWriteSync(1).mask != null)
+
+          if(hasMask && !maskAOnly && !maskBOnly){
+            if(memTopology.readWriteSync(0).mask.getWidth != memTopology.readWriteSync(1).mask.getWidth){
+              SpinalError("Mask width of Port A and Port B should be the same in Dual port sram")
+            }
+          }
+
+          val memMaskWidth = if(hasMask){
+            if(maskAOnly) {
+              memTopology.readWriteSync(0).mask.getWidth
+            } else {
+              memTopology.readWriteSync(1).mask.getWidth
+            }
+          } else 0
+
+
+          val memConfig = MakeMemConfig(memMaskWidth)
+
           val portA = memTopology.readWriteSync(0)
           val portB = memTopology.readWriteSync(1)
           val ram = Ram2rw(memConfig)
@@ -91,7 +118,9 @@ class PhaseSramConverter(globalMemVendor: MemVendor = Vendor.Huali, policy: MemB
           ram.io.dpa.writeData.assignFrom(portA.data)
           if (portA.mask != null) {
             ram.io.apa.mask.assignFrom(portA.mask)
-          } else {
+          } else if(hasMask){
+            // portA is null and hasMask, then only apb part has mask.
+            // apa part should set high
             ram.io.apa.mask.setAllTo(true)
           }
           wrapConsumers(memTopology, portA, ram.io.dpa.readData)
@@ -103,7 +132,7 @@ class PhaseSramConverter(globalMemVendor: MemVendor = Vendor.Huali, policy: MemB
           ram.io.dpb.writeData.assignFrom(portB.data)
           if (portB.mask != null) {
             ram.io.apb.mask.assignFrom(portB.mask)
-          } else {
+          } else if (hasMask){
             ram.io.apb.mask.setAllTo(true)
           }
           wrapConsumers(memTopology, portB, ram.io.dpb.readData)
@@ -113,6 +142,8 @@ class PhaseSramConverter(globalMemVendor: MemVendor = Vendor.Huali, policy: MemB
         null
       case TwoPort =>
         mem.component.rework {
+          val memMaskWidth = if (memTopology.writes.head.mask != null) memTopology.writes.head.mask.getWidth else 0
+          val memConfig = MakeMemConfig(memMaskWidth)
           val rd = memTopology.readsSync.head
           val wr = memTopology.writes.head
           val ram = Ram1r1w(memConfig)
@@ -120,7 +151,6 @@ class PhaseSramConverter(globalMemVendor: MemVendor = Vendor.Huali, policy: MemB
           ram.io.clka := rd.clockDomain.readClockWire
           ram.io.apa.address.assignFrom(rd.address)
           ram.io.apa.memoryEnable.assignFrom(rd.clockDomain.isClockEnableActive && wrapBool(rd.readEnable))
-          ram.io.apa.mask.setAllTo(true)
           wrapConsumers(memTopology, rd, ram.io.dp.readData)
 
           ram.io.clkb := wr.clockDomain.readClockWire
@@ -129,9 +159,9 @@ class PhaseSramConverter(globalMemVendor: MemVendor = Vendor.Huali, policy: MemB
           ram.io.dp.writeEnable.assignFrom(wrapBool(wr.writeEnable))
           ram.io.dp.writeData.assignFrom(wr.data)
           if (wr.mask != null) {
-            ram.io.apb.mask.assignFrom(wr.mask)
-          } else {
-            ram.io.apb.mask setAllTo true
+            ram.io.apa.mask.assignFrom(wr.mask)
+            ram.io.apb.mask.setAllTo(true) // apb is useless, but Ram1r1w will generate apb.mask input if wr.mask is not null.
+                                           // If we dont connect the input, it may incur syntax error when operated the compilation or synthesis.
           }
 
           removeMem(mem)

@@ -29,14 +29,14 @@ case class Ram1rw(mc: MemConfig) extends MemWrapper(mc) {
 }
 
 /**
- * Memory wrapper type for dual port SRAM
+ * Memory wrapper type for two port SRAM
  * @param mc - memory config, including the data width, address width and memory vendor etc.
  */
 case class Ram1r1w(mc: MemConfig) extends MemWrapper(mc) {
   val io = new Bundle {
     val clka, clkb = in Bool()
     val apa = in(AddrCtrlPorts(mc))
-    val apb = in(AddrCtrlPorts(mc))
+    val apb = in(AddrCtrlPorts(mc)) // todo Ram1r1w doesnt need the mask of apb. May change this definition latter.
     val dp = master(DataPorts(mc))
 //    val bista = master(BistPorts(mc))
 //    val bistb = master(BistPorts(mc))
@@ -50,7 +50,7 @@ case class Ram1r1w(mc: MemConfig) extends MemWrapper(mc) {
 }
 
 /**
- * Memory wrapper type for two port SRAM
+ * Memory wrapper type for dual port SRAM
  * @param mc - memory config, including the data width, address width and memory vendor etc.
  */
 case class Ram2rw(mc: MemConfig) extends MemWrapper(mc) {
@@ -63,12 +63,12 @@ case class Ram2rw(mc: MemConfig) extends MemWrapper(mc) {
     val dpb = master(DataPorts(mc))
 //    val bistb = master(BistPorts(mc))
   }
-  override val ram = mc.vendor.build(this)
   val cda = ClockDomain.internal("cda", withReset = false)
   val cdb = ClockDomain.internal("cdb", withReset = false)
   cda.clock := io.clka
   cdb.clock := io.clkb
   noIoPrefix()
+  override val ram = mc.vendor.build(this)
 }
 
 /**

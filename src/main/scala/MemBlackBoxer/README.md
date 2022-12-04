@@ -19,16 +19,18 @@ case class MemToy() extends Component {
   val bus = slave(Axi4Shared(mem.axiConfig))
   mem.io.axi <> bus
 }
-def main(args: Array[String]): Unit = {
-  new File("rtl").mkdir()
-  val vendor = MemBlackBoxer.Vendor.Huali
-  val config = SpinalConfig(
-    targetDirectory = "rtl"
-  )
-  config.addTransformationPhase(
-    new PhaseSramConverter(vendor, policy = blackboxAll)
-  )
-  config.generateVerilog(MemToy())
+object MemToyMain {
+  def main(args: Array[String]): Unit = {
+    new File("rtl").mkdir()
+    val vendor = MemBlackBoxer.Vendor.Huali
+    val config = SpinalConfig(
+      targetDirectory = "rtl"
+    )
+    config.addTransformationPhase(
+      new PhaseSramConverter(vendor, policy = blackboxAll)
+    )
+    config.generateVerilog(MemToy())
+  }
 }
 ```
 Inside the `MemToy`, a module named `Axi4SharedOnChipRam` is instantiated as `mem`. A `Mem` object `ram` is inside the module,
@@ -133,6 +135,28 @@ Then you can change the default memory blackbox policy `blackboxAll` to followin
 The policy can be passed to `PhaseSramConverter` as a parameter.
 
 You can tag the memory with a specific `MemVendor`. 
+
+### Write Memory Mask
+
+Write Memory Mask may be generated only when you specified the mask in the writing behavior of the memory. As following:
+```scala
+dout := mem.readWriteSync(
+  address = addr,
+  data = din,
+  enable = mea,
+  write = wea,
+  mask = B"1" // -> generate the write mask
+)
+```
+
+**Feature**
+* The bit width of the mask in the `MemWrapper` is based on the mask declared in writing behavior.
+* The bit width of the mask in the `Blackbox` is based on the vendor.
+* Each `MemVendor` should carefully connect the wire of mask.
+* DualPort sram only support the following situation:
+    * PortA and PortB all claim the Mask and the bit width of both are the same.
+    * Only one of the PortA and PortB claims the Mask and leave the other one as null. (In this situation, the mask of the other Port is set to true as default)
+
 
 ### TODO
 

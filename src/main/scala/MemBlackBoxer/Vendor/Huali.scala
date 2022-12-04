@@ -31,7 +31,7 @@ object Huali extends MemVendor {
       val ADRA, ADRB = in UInt (wrap.mc.addrWidth bit)
       val DA = in Bits (wrap.mc.dataWidth bit)
       val QB = out Bits (wrap.mc.dataWidth bit)
-      val WEMA, WEMB = in Bits (wrap.mc.dataWidth bit)
+      val WEMA = if (wrap.mc.noMask) null else in Bits (wrap.mc.dataWidth bit) // 1r1w may only have one Write mask.
       val WEA, MEA, MEB, TEST1A, TEST1B, RMEA, RMEB, LS = in Bool()
       val RMA, RMB = in Bits (4 bit)
     }
@@ -48,10 +48,11 @@ object Huali extends MemVendor {
       this.io.ADRB <> wrap.io.apb.address
       this.io.DA <> wrap.io.dp.writeData
       this.io.QB <> wrap.io.dp.readData
-      this.io.WEMA <> wrap.io.apa.mask
-      this.io.WEMB <> wrap.io.apb.mask
       this.io.WEA <> wrap.io.dp.writeEnable
       this.io.MEA <> wrap.io.apa.memoryEnable
+      if(!wrap.mc.noMask) {
+        this.io.WEMA <> Vec(wrap.io.apa.mask.subdivideIn(1 bit).map(_.asSInt.resize(wrap.mc.bitPerMask).asBits)).asBits.resized
+      }
       this.io.MEB <> wrap.io.apb.memoryEnable
       this.io.TEST1A := False
       this.io.RMEA := False
@@ -73,7 +74,7 @@ object Huali extends MemVendor {
       val ADR = in UInt (wrap.mc.addrWidth bit)
       val D = in Bits (wrap.mc.dataWidth bit)
       val Q = out Bits (wrap.mc.dataWidth bit)
-      val WEM = in Bits (wrap.mc.dataWidth bit)
+      val WEM = if (wrap.mc.noMask) null else in Bits (wrap.mc.dataWidth bit)
       val WE, ME, TEST1, RME, LS = in Bool()
       val RM = in Bits (4 bit)
     }
@@ -87,7 +88,9 @@ object Huali extends MemVendor {
       this.io.ADR <> wrap.io.ap.address
       this.io.D <> wrap.io.dp.writeData
       this.io.Q <> wrap.io.dp.readData
-      this.io.WEM <> wrap.io.ap.mask
+      if(!wrap.mc.noMask) {
+        this.io.WEM <> Vec(wrap.io.ap.mask.subdivideIn(1 bit).map(_.asSInt.resize(wrap.mc.bitPerMask).asBits)).asBits.resized
+      }
       this.io.WE <> wrap.io.dp.writeEnable
       this.io.ME <> wrap.io.ap.memoryEnable
       this.io.TEST1 := False
@@ -108,7 +111,8 @@ object Huali extends MemVendor {
       val ADRA, ADRB = in UInt (wrap.mc.addrWidth bit)
       val DA, DB = in Bits (wrap.mc.dataWidth bit)
       val QA, QB = out Bits (wrap.mc.dataWidth bit)
-      val WEMA, WEMB = in Bits (wrap.mc.dataWidth bit)
+      val WEMA = if (wrap.mc.noMask) null else in Bits (wrap.mc.dataWidth bit)
+      val WEMB = if (wrap.mc.noMask) null else in Bits (wrap.mc.dataWidth bit)
       val WEA, WEB, MEA, MEB, TEST1A, TEST1B, RMEA, RMEB, LS = in Bool()
       val RMA, RMB = in Bits (4 bit)
     }
@@ -130,9 +134,11 @@ object Huali extends MemVendor {
       //    if(wrap.mc.needMask){
       //      val maska = if (wrap.mc.needMask) wrap.io.apa.mask else B(wrap.mc.dataWidth bit, default -> true)
       //      val maskb = if (wrap.mc.needMask) wrap.io.apb.mask else B(wrap.mc.dataWidth bit, default -> true)
-      this.io.WEMA <> wrap.io.apa.mask
-      this.io.WEMB <> wrap.io.apb.mask
       //    }
+      if(!wrap.mc.noMask) {
+        this.io.WEMA <> Vec(wrap.io.apa.mask.subdivideIn(1 bit).map(_.asSInt.resize(wrap.mc.bitPerMask).asBits)).asBits.resized
+        this.io.WEMB <> Vec(wrap.io.apb.mask.subdivideIn(1 bit).map(_.asSInt.resize(wrap.mc.bitPerMask).asBits)).asBits.resized
+      }
       this.io.WEA <> wrap.io.dpa.writeEnable
       this.io.WEB <> wrap.io.dpb.writeEnable
       this.io.MEA <> wrap.io.apa.memoryEnable
