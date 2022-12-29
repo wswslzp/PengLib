@@ -4,4 +4,9 @@ simWorkspace/*
 rtl/*
 tmp/*
 project/target/*
-
+project/.bloop/*
+project/project/*
+.bloop/*
+.bloop/penglib/*
+.metals/*
+.vscode/*
